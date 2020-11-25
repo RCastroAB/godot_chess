@@ -1,0 +1,10 @@
+To Think:
+
+choose an AI algorithm
+implementation of turns
+implementation of abstract pieces
+
+To-do:
+draw new pieces
+create different moves
+
