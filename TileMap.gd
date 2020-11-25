@@ -30,6 +30,16 @@ func _ready():
 	add_child(piece)
 	print(piece.position)
 	
+	piece = Piece.instance()
+	place_piece(piece, 6, 0)
+	piece.create_piece('knight')
+	add_child(piece)
+	print(piece.position)
+	piece = Piece.instance()
+	place_piece(piece, 1, 0)
+	piece.create_piece('knight')
+	add_child(piece)
+	print(piece.position)
 	
 	print(get_children())
 	walking = false

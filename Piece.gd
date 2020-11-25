@@ -26,6 +26,21 @@ func king_moves():
 	return directions
 
 
+func knight_moves():
+	var seed_vec = Vector2(2, 1)
+	var rotation_matrix = Transform2D(
+		Vector2(0,1), Vector2(-1,0), Vector2(0,0))
+	var directions = [seed_vec]
+	var vec = seed_vec
+	var revec
+	var rerevec
+	for i in range(4):
+		vec = rotation_matrix.basis_xform(vec)
+		revec = vec * Vector2(-1,1)
+		rerevec = vec * Vector2(1,-1)
+		directions += [vec, revec, rerevec]
+	return directions
+
 
 func create_piece(piecename):
 	var movesrepeat
@@ -36,7 +51,9 @@ func create_piece(piecename):
 		'queen':
 			moves = king_moves()
 			repeat = true
-
+		'knight':
+			moves = knight_moves()
+			repeat = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
