@@ -25,7 +25,6 @@ func king_moves():
 		Vector2(1,-1),
 		Vector2(-1,1),
 		Vector2(1,1),
-		Vector2(0,0),
 		Vector2(0,-1),
 		Vector2(0,1),
 	]
@@ -39,12 +38,10 @@ func knight_moves():
 	var directions = [seed_vec]
 	var vec = seed_vec
 	var revec
-	var rerevec
 	for i in range(4):
 		vec = rotation_matrix.basis_xform(vec)
 		revec = vec * Vector2(-1,1)
-		rerevec = vec * Vector2(1,-1)
-		directions += [vec, revec, rerevec]
+		directions += [vec, revec]
 	return directions
 
 func pawn_moves():
