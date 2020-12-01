@@ -8,7 +8,7 @@ var type
 # var a = 2
 # var b = "text"
 export var grid_position = Vector2()
-var player;
+var player
 
 const SPRITES = 'res://sprites/'
 
