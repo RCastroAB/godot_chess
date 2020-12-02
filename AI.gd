@@ -2,6 +2,7 @@ extends Node
 
 var board
 signal movement_choice(piece, position)
+const MAX_DEPTH = 2
 
 export var piece_vals = {
 	'king': 100,
@@ -27,7 +28,10 @@ func _ready():
 #	pass
 
 
-func calculate_gamestate_value(gamestate):
+func calculate_gamestate_value(gamestate, depth, color):
+	if depth < MAX_DEPTH:
+		color = 'black' if color == 'white' else 'white'
+		return -get_best_move(gamestate, color, depth+1)[2]
 	var state_value = 0
 	for piece in gamestate.values():
 		if piece.player == 'black':
@@ -36,34 +40,37 @@ func calculate_gamestate_value(gamestate):
 			state_value -= piece_vals[piece.type]
 	return state_value
 
-func get_best_move():
-	pass
 
-func process_turn():
-	var current_gamestate = board.get_gamestate()
-	var moves = board.get_all_moves('black')
+func get_best_move(gamestate, color, depth):
+	var moves = board.get_all_moves(gamestate, color)
 	var attacks = moves[1]
-	var gamestate
-	var value
 	moves = moves[0]
 	var candidates = []
 	
+	var value
 	for piece in moves.keys():
 		for move in moves[piece]:
-			gamestate = board.get_gamestate_ifmove(piece, move)
-			value = calculate_gamestate_value(gamestate)
+			gamestate = board.get_gamestate_ifmove(gamestate, piece, move)
+			value = calculate_gamestate_value(gamestate, depth, color)
 			candidates += [[piece, move, value]]
 	
 	for piece in attacks.keys():
 		for attack in attacks[piece]:
-			gamestate = board.get_gamestate_ifmove(piece, attack)
-			value = calculate_gamestate_value(gamestate)
+			gamestate = board.get_gamestate_ifmove(gamestate, piece, attack)
+			value = calculate_gamestate_value(gamestate, depth, color)
 			value += 1
 			candidates += [[piece, attack, value]]
+	
 	candidates.sort_custom(MoveSorter, 'sort_descending')
-	candidates = candidates.slice(0, 3)
-	candidates.shuffle()
-	emit_signal('movement_choice', candidates[0][0], candidates[0][1])
+	return candidates[0]
+	
+func process_turn():
+	var current_gamestate = board.get_gamestate()
+	
+	
+	var candidate = get_best_move(current_gamestate, 'black', 0)
+	print(candidate)
+	emit_signal('movement_choice', candidate[0], candidate[1])
 
 
 class MoveSorter:
