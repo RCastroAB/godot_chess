@@ -125,8 +125,8 @@ func try_select(mousepos):
 	if piece.player != current_player:
 		return
 	selected = piece
-	valid_moves = calculate_moves(selected)
-	valid_attacks = calculate_attacks(selected)
+	valid_moves = calculate_moves(position_pieces, selected)
+	valid_attacks = calculate_attacks(position_pieces, selected)
 	draw_overlay()
 
 func check_valid_move(endpos):
@@ -136,7 +136,7 @@ func check_valid_move(endpos):
 		return false
 	return true
 
-func calculate_moves(selected):
+func calculate_moves(gamestate, selected):
 	var moves = selected.get_moves()
 	var possible_moves =[]
 	if not selected.moved:
@@ -145,14 +145,14 @@ func calculate_moves(selected):
 		var endpos = selected.grid_position
 		while check_valid_move(endpos+ move):
 			endpos += move
-			if endpos in position_pieces.keys():
+			if endpos in gamestate.keys():
 				break
 			possible_moves += [endpos]
 			if not selected.repeat:
 				break
 	return possible_moves
 
-func calculate_attacks(selected):
+func calculate_attacks(gamestate, selected):
 	var possible_attacks = []
 	var attacks = selected.get_attacks()
 	for attack in attacks:
@@ -161,8 +161,8 @@ func calculate_attacks(selected):
 			endpos = endpos + attack
 			if not check_valid_move(endpos):
 				break
-			if endpos in position_pieces.keys():
-				if position_pieces[endpos].player != selected.player:
+			if endpos in gamestate.keys():
+				if gamestate[endpos].player != selected.player:
 					possible_attacks += [endpos]
 				break
 			if not selected.repeat:
@@ -228,8 +228,8 @@ func get_all_moves(gamestate, color):
 	for piece in gamestate.values():
 		if piece.player != color:
 			continue
-		all_moves[piece] = calculate_moves(piece)
-		all_attacks[piece] = calculate_attacks(piece)
+		all_moves[piece] = calculate_moves(position_pieces, piece)
+		all_attacks[piece] = calculate_attacks(position_pieces, piece)
 	
 	return [all_moves, all_attacks]
 

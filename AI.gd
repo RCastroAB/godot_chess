@@ -33,13 +33,21 @@ func _ready():
 func calculate_gamestate_value(gamestate, depth, color):
 	if depth < MAX_DEPTH:
 		color = 'black' if color == 'white' else 'white'
-		return -get_best_move(gamestate, color, depth+1)[2]
+		var value = -get_best_move(gamestate, color, depth+1)[0][2]
 	var state_value = 0
 	for piece in gamestate.values():
-		if piece.player == 'black':
-			state_value += piece_vals[piece.type]
-		else:
-			state_value -= piece_vals[piece.type]
+#		if piece.player != color:
+#			continue
+		var piece_value = 0
+		piece_value += piece_vals[piece.type]
+		if piece.type != 'king':
+#			var moves = board.calculate_moves(gamestate, piece)
+#			piece_value += sqrt(moves.size())
+			var attacks = board.calculate_attacks(gamestate, piece)
+			piece_value += sqrt(attacks.size() * 2)
+		state_value += piece_value
+
+	
 	return state_value
 
 
@@ -64,7 +72,9 @@ func get_best_move(gamestate, color, depth):
 			candidates += [[piece, attack, value]]
 	
 	candidates.sort_custom(MoveSorter, 'sort_descending')
-	return candidates[0]
+
+	return candidates
+	
 	
 func process_turn(current_player):
 	if current_player != color:
@@ -74,7 +84,7 @@ func process_turn(current_player):
 	
 	var candidate = get_best_move(current_gamestate, color, 0)
 	print(candidate)
-	emit_signal('movement_choice', candidate[0], candidate[1])
+	emit_signal('movement_choice', candidate[0][0], candidate[0][1])
 
 
 class MoveSorter:
