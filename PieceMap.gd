@@ -1,8 +1,8 @@
 extends TileMap
 var Piece = load('res://Piece.tscn')
 
-const player_num = 1
-signal ai_turn
+const player_num = 0
+signal ai_turn(current_player)
 
 var winner
 
@@ -72,6 +72,10 @@ func fill_board(color):
 func _ready():
 	fill_board('white')
 	fill_board('black')
+	
+	if player_num == 0:
+		yield(get_tree(), "idle_frame")
+		emit_signal("ai_turn", current_player)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -90,7 +94,11 @@ func _process(delta):
 		current_player = 'black' if current_player == 'white' else 'white'
 		if player_num == 1 and current_player == 'black' and not winner:
 			yield(get_tree(), "idle_frame")
-			emit_signal("ai_turn")
+			print("aiturn")
+			emit_signal("ai_turn", current_player)
+		elif player_num == 0 and not winner:
+			yield(get_tree(), "idle_frame")
+			emit_signal("ai_turn", current_player)
 		return
 
 	selected.position += velocity

@@ -13,10 +13,12 @@ export var piece_vals = {
 	'pawn': 1
 }
 
+var color
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
-
+func set_color(pcolor):
+	color = pcolor
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -64,11 +66,13 @@ func get_best_move(gamestate, color, depth):
 	candidates.sort_custom(MoveSorter, 'sort_descending')
 	return candidates[0]
 	
-func process_turn():
+func process_turn(current_player):
+	if current_player != color:
+		return
 	var current_gamestate = board.get_gamestate()
 	
 	
-	var candidate = get_best_move(current_gamestate, 'black', 0)
+	var candidate = get_best_move(current_gamestate, color, 0)
 	print(candidate)
 	emit_signal('movement_choice', candidate[0], candidate[1])
 

@@ -13,3 +13,5 @@ script = ExtResource( 4 )
 [node name="PieceMap" parent="." instance=ExtResource( 2 )]
 
 [node name="AI" parent="." instance=ExtResource( 3 )]
+
+[node name="AI2" parent="." instance=ExtResource( 3 )]
