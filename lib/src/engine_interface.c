@@ -1,7 +1,5 @@
 #include <gdnative_api_struct.gen.h>
 #include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "engine.h"
 
 typedef struct user_data_struct {
@@ -87,7 +85,6 @@ void GDN_EXPORT godot_nativescript_init(void *p_handle) {
 	get_piece.method = &engine_get_piece;
 
 	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "get_piece", attributes, get_piece);
-	printf("finished construction\n");
 }
 
 // In our constructor, allocate memory for our structure and fill
@@ -99,6 +96,8 @@ GDCALLINGCONV void *engine_constructor(godot_object *p_instance, void *p_method_
 	user_data_struct *user_data = api->godot_alloc(sizeof(user_data_struct));
 	strcpy(user_data->data, "World from GDNative!");
 	user_data->board = api->godot_alloc(sizeof(Board));
+	new_board(user_data->board);
+	fill_board(user_data->board);
 	return user_data;
 }
 
@@ -106,9 +105,6 @@ GDCALLINGCONV void *engine_constructor(godot_object *p_instance, void *p_method_
 // object and we free our instances' member data.
 GDCALLINGCONV void engine_destructor(godot_object *p_instance, void *p_method_data, void *p_user_data) {
 	user_data_struct *user_data = (user_data_struct *)p_user_data;
-	printf("got here before crash\n");
-	printf("aaaa\n");
-	free_board(user_data->board);
 	api->godot_free(p_user_data);
 }
 

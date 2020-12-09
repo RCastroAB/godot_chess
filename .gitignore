@@ -5,5 +5,5 @@ exports/*
 !exports/.gitkeep
 lib/bin/*
 !lib/bin/.gitkeep
-*.o
-*.h.ghc
+**/*.o
+**/*.h.ghc
