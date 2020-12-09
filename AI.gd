@@ -2,7 +2,7 @@ extends Node
 
 var board
 signal movement_choice(piece, position)
-const MAX_DEPTH = 3
+const MAX_DEPTH = 2
 
 export var piece_vals = {
 	'king': 100,
@@ -37,18 +37,22 @@ func merge(d1, d2):
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
-func evaluate_gamestate(gamestate, color):
+func evaluate_gamestate(gamestate, pcolor):
 	var state_value = 0
 	var win = true
 	var lose = true
 	for piece in gamestate.values():
 		var piece_value = 0
 		piece_value += piece_vals[piece.type]
+			
 		if piece.type =='king':
 			if piece.player == color:
 				lose = false
 			else:
 				win = false
+#		else:
+#			piece_value += sqrt(board.calculate_moves(gamestate, piece).size())
+#			piece_value += sqrt(board.calculate_attacks(gamestate, piece).size()*2)
 		if piece.player == color:
 			state_value += piece_value
 		else:
@@ -61,118 +65,68 @@ func evaluate_gamestate(gamestate, color):
 		return state_value
 		
 
-func min_gamestate(gamestate, color, depth):
+func min_gamestate(gamestate, color, alpha, beta, depth):
 	if depth == MAX_DEPTH:
-		return evaluate_gamestate(gamestate, color)
+		return evaluate_gamestate(gamestate, self.color)
 	var moves = board.get_all_moves(gamestate, color)
 	moves = merge(moves[0], moves[1])
-	var candidate
-	var candidates = []
+	var min_val = INF
 	var value
 	var next_gamestate
 	var next_color = 'black' if color == 'white' else 'white'
 	for piece in moves.keys():
 		for move in moves[piece]:
 			next_gamestate = board.get_gamestate_ifmove(gamestate, piece, move)
-			value = max_gamestate(next_gamestate, next_color, depth+1)
-			candidates += [[piece, move, value]]
-	candidates.sort_custom(MoveSorter, 'sort_descending')
-	var min_value = candidates[0][2]
-	var i = 0
-	while i < candidates.size() and min_value == candidates[i][2]:
-		i += 1
-	candidates = candidates.slice(0, i)
-	candidates.shuffle()
-	return candidates[0]
+			value = max_gamestate(next_gamestate, next_color, alpha, beta, depth+1)
+			if value <= min_val:
+				min_val = value
+			beta = min(value, beta)
+			if alpha >= beta:
+				break
+		if alpha >= beta:
+			break
+	return min_val
 
-func max_gamestate(gamestate, color, depth):
+func max_gamestate(gamestate, color, alpha, beta, depth):
 	if depth == MAX_DEPTH:
 		return evaluate_gamestate(gamestate, color)
 	var moves = board.get_all_moves(gamestate, color)
 	moves = merge(moves[0], moves[1])
-	var candidates = []
 	var value
 	var next_gamestate
-	var candidate
 	var next_color = 'black' if color == 'white' else 'white'
+	var max_val = -INF
 	for piece in moves.keys():
 		for move in moves[piece]:
 			next_gamestate = board.get_gamestate_ifmove(gamestate, piece, move)
-			value = min_gamestate(next_gamestate, next_color, depth+1)
-			candidates += [[piece, move, value]]
-	candidates.sort_custom(MoveSorter, 'sort_descending')
-	var max_value = candidates[0][2]
-	var i = 0
-	while i < candidates.size() and max_value == candidates[i][2]:
-		i += 1
-	candidates = candidates.slice(0, i)
-	candidates.shuffle()
-	return candidates[0]
+			value = min_gamestate(next_gamestate, next_color, alpha, beta, depth+1)
+			if value >= max_val:
+				max_val = value
+			alpha = max(alpha, value)
+			if alpha >= beta:
+				break
+		if alpha >= beta:
+			break
+	
+	return max_val
 
 func minmax_gamestate(gamestate, color):
-	var move =  max_gamestate(gamestate, color, 0)
-	return move
-
-func calculate_gamestate_value(gamestate, depth, color):
-	if depth < MAX_DEPTH:
-		color = 'black' if color == 'white' else 'white'
-		var value = get_best_move(gamestate, color, depth+1)[0][2]
-	var state_value = 0
-	var no_king = true
-	var no_enemy_king = true
-	for piece in gamestate.values():
-		if piece.player != color:
-			if piece.type == 'king':
-				no_enemy_king = false
-			continue
-		var piece_value = 0
-		piece_value += piece_vals[piece.type]
-		if piece.type != 'king':
-#			var moves = board.calculate_moves(gamestate, piece)
-#			piece_value += sqrt(moves.size())
-			var attacks = board.calculate_attacks(gamestate, piece)
-			piece_value += sqrt(attacks.size() * 2)
-		else:
-			no_king = false
-		state_value += piece_value
-	if no_king:
-		state_value = - INF
-	if no_enemy_king:
-		state_value = INF
-	
-	return state_value
-
-
-func get_best_move(gamestate, color, depth):
 	var moves = board.get_all_moves(gamestate, color)
-	var attacks = moves[1]
-	moves = moves[0]
-	var candidates = []
-	
-	var value
-	for piece in moves.keys():
+	moves = merge(moves[0], moves[1])
+	var max_val = -INF
+	var best_move
+	var movekeys = moves.keys()
+	movekeys.shuffle()
+	for piece in movekeys:
 		for move in moves[piece]:
-			gamestate = board.get_gamestate_ifmove(gamestate, piece, move)
-			value = calculate_gamestate_value(gamestate, depth, color)
-			candidates += [[piece, move, value]]
-	
-	for piece in attacks.keys():
-		for attack in attacks[piece]:
-			gamestate = board.get_gamestate_ifmove(gamestate, piece, attack)
-			value = calculate_gamestate_value(gamestate, depth, color)
-			value += 1
-			candidates += [[piece, attack, value]]
-	
-	candidates.sort_custom(MoveSorter, 'sort_descending')
-	var max_value = candidates[0][2]
-	var i = 0
-	while i < candidates.size() and max_value == candidates[i][2]:
-		i += 1
-	candidates.resize(i)
-	candidates.shuffle()
-	return candidates
-	
-	
+			var value = max_gamestate(gamestate, color, -INF, INF, 0)
+#			print(piece, move, value)
+			if value >=  max_val:
+				best_move = [piece, move]
+				max_val = value
+#	print(best_move, max_val)
+	return best_move
+
 func process_turn(current_player):
 	if current_player != color:
 		return
@@ -180,8 +134,7 @@ func process_turn(current_player):
 	
 	
 	var candidate = minmax_gamestate(current_gamestate, color)
-	print(candidate)
-	print(candidate)
+#	print(color, candidate)
 	emit_signal('movement_choice', candidate[0], candidate[1])
 
 

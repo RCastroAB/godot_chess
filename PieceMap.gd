@@ -1,7 +1,7 @@
 extends TileMap
 var Piece = load('res://Piece.tscn')
 
-const player_num = 1
+const player_num =0
 signal ai_turn(current_player)
 
 var winner
@@ -32,7 +32,7 @@ func create_piece(piecename, x, y, color):
 	place_piece(piece, Vector2(x,y))
 	piece.create_piece(piecename, color)
 	add_child(piece)
-	print(piece.type, piece.get_moves())
+#	print(piece.type, piece.get_moves())
 
 
 func fill_board(color):
@@ -90,11 +90,11 @@ func _process(delta):
 		$AudioStreamPlayer2D.position = target
 		$AudioStreamPlayer2D.play()
 		$AudioStreamPlayer2D.pitch_scale = rand_range(0.99, 1.1)
-		print($AudioStreamPlayer2D.pitch_scale)
+#		print($AudioStreamPlayer2D.pitch_scale)
 		current_player = 'black' if current_player == 'white' else 'white'
 		if player_num == 1 and current_player == 'black' and not winner:
 			yield(get_tree(), "idle_frame")
-			print("aiturn")
+#			print("aiturn")
 			emit_signal("ai_turn", current_player)
 		elif player_num == 0 and not winner:
 			yield(get_tree(), "idle_frame")

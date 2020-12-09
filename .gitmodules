@@ -1,0 +1,3 @@
+[submodule "lib/godot_headers"]
+	path = lib/godot_headers
+	url = https://github.com/godotengine/godot_headers
