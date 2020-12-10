@@ -58,9 +58,9 @@ func evaluate_gamestate(gamestate, pcolor):
 		else:
 			state_value -= piece_value
 	if win:
-		return INF
+		return 500
 	elif lose:
-		return -INF
+		return -500
 	else:
 		return state_value
 		
@@ -107,8 +107,19 @@ func max_gamestate(gamestate, color, alpha, beta, depth):
 				break
 		if alpha >= beta:
 			break
-	
 	return max_val
+
+func check_win(gamestate, color):
+	var win = true
+	for piece in gamestate.values():
+		if piece.type == 'king' and piece.player != color:
+			win = false
+	return win
+
+func thread_caller(params):
+	if check_win(params[0], params[1]):
+		return INF
+	return max_gamestate(params[0], params[1], params[2], params[3], params[4])
 
 func minmax_gamestate(gamestate, color):
 	var moves = board.get_all_moves(gamestate, color)
@@ -117,14 +128,24 @@ func minmax_gamestate(gamestate, color):
 	var best_move
 	var movekeys = moves.keys()
 	movekeys.shuffle()
+	var threads = []
 	for piece in movekeys:
 		for move in moves[piece]:
-			var value = max_gamestate(gamestate, color, -INF, INF, 0)
-#			print(piece, move, value)
-			if value >=  max_val:
-				best_move = [piece, move]
-				max_val = value
-#	print(best_move, max_val)
+			var thread = Thread.new()
+			var ret = thread.start(self, "thread_caller", [gamestate, color, -INF, INF, 0])
+			threads += [[piece, move, thread]]
+	for thread in threads:
+		var piece = thread[0]
+		var move = thread[1]
+		thread = thread[2]
+		
+		var value = thread.wait_to_finish()
+		if value == INF:
+			print(piece, move, value)
+		if value >=  max_val:
+			best_move = [piece, move]
+			max_val = value
+	print(color, max_val)
 	return best_move
 
 func process_turn(current_player):
@@ -132,9 +153,12 @@ func process_turn(current_player):
 		return
 	var current_gamestate = board.get_gamestate()
 	
-	
+	var past = OS.get_ticks_msec()
 	var candidate = minmax_gamestate(current_gamestate, color)
+	var future = OS.get_ticks_msec()
+#	print(future-past)
 #	print(color, candidate)
+	print(candidate)
 	emit_signal('movement_choice', candidate[0], candidate[1])
 
 

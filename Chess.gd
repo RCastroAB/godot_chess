@@ -7,8 +7,8 @@ extends Node2D
 onready var engine  = load("res://lib/bin/libengine.gdns").new()
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$PieceMap.connect('ai_turn', $AI, 'process_turn')
-	$PieceMap.connect('ai_turn', $AI2, 'process_turn')
+	$PieceMap.connect('ai_turn', $AI, 'process_turn',[], CONNECT_DEFERRED)
+	$PieceMap.connect('ai_turn', $AI2, 'process_turn',[], CONNECT_DEFERRED)
 	$AI.connect("movement_choice", $PieceMap, 'ai_move')
 	$AI2.connect("movement_choice", $PieceMap, 'ai_move')
 	$AI.set_color('white')

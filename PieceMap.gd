@@ -67,7 +67,6 @@ func fill_board(color):
 # var a = 2
 # var b = "text"
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	fill_board('white')
@@ -76,8 +75,7 @@ func _ready():
 	if player_num == 0:
 		yield(get_tree(), "idle_frame")
 		emit_signal("ai_turn", current_player)
-
-
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	if not walking:
