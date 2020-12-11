@@ -3,6 +3,7 @@ var Piece = load('res://Piece.tscn')
 
 const player_num =0
 signal ai_turn(current_player)
+const test_num = 0
 
 var winner
 
@@ -69,8 +70,19 @@ func fill_board(color):
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	fill_board('white')
-	fill_board('black')
+	if not test_num:
+		fill_board('white')
+		fill_board('black')
+	else:
+		match (test_num):
+			1:
+				create_piece('king', 0, 1, 'black')
+				create_piece('queen', 1, 7, 'white')
+				create_piece('king', 2, 2, 'white')
+			2:
+				create_piece('king', 0, 1, 'black')
+				create_piece('queen', 1, 1, 'white')
+				create_piece('king', 2, 2, 'white')
 	
 	if player_num == 0:
 		yield(get_tree(), "idle_frame")
@@ -216,11 +228,20 @@ func get_gamestate():
 
 func get_gamestate_ifmove(gamestate, piece, move):
 	var new_gamestate = gamestate.duplicate()
-	new_gamestate.erase(piece.grid_position)
+	for pos in gamestate.keys():
+		if gamestate[pos] == piece:
+			new_gamestate.erase(pos)
+			break
 	new_gamestate[move] = piece
 	return new_gamestate
 
 func get_all_moves(gamestate, color):
+	var lose = true
+	for piece in gamestate.values():
+		if piece.type=='king' and piece.player==color:
+			lose = false
+	if lose:
+		return [{}, {}]
 	var all_moves = {}
 	var all_attacks = {}
 	for piece in gamestate.values():

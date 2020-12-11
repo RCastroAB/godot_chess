@@ -3,9 +3,10 @@ extends Node
 var board
 signal movement_choice(piece, position)
 const MAX_DEPTH = 2
+var opposite_color
 
 export var piece_vals = {
-	'king': 100,
+	'king': 0,
 	'queen': 10,
 	'knight': 4,
 	'bishop': 3,
@@ -19,6 +20,7 @@ var color
 # var b = "text"
 func set_color(pcolor):
 	color = pcolor
+	opposite_color = 'white' if color == 'black' else 'black'
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -26,6 +28,7 @@ func _ready():
 
 
 func merge(d1, d2):
+#	print(d1.size(), ', ',d2.size())
 	for key in d1.keys():
 		if key in d2.keys():
 			d1[key] += d2[key]
@@ -66,14 +69,16 @@ func evaluate_gamestate(gamestate, pcolor):
 		
 
 func min_gamestate(gamestate, color, alpha, beta, depth):
+	var next_color = 'black' if color == 'white' else 'white'
+	if check_win(gamestate, next_color):
+		return 999
 	if depth == MAX_DEPTH:
 		return evaluate_gamestate(gamestate, self.color)
 	var moves = board.get_all_moves(gamestate, color)
 	moves = merge(moves[0], moves[1])
-	var min_val = INF
+	var min_val = 999
 	var value
 	var next_gamestate
-	var next_color = 'black' if color == 'white' else 'white'
 	for piece in moves.keys():
 		for move in moves[piece]:
 			next_gamestate = board.get_gamestate_ifmove(gamestate, piece, move)
@@ -88,14 +93,17 @@ func min_gamestate(gamestate, color, alpha, beta, depth):
 	return min_val
 
 func max_gamestate(gamestate, color, alpha, beta, depth):
+	var next_color = 'black' if color == 'white' else 'white'
+	if check_win(gamestate, next_color):
+		return -999
 	if depth == MAX_DEPTH:
 		return evaluate_gamestate(gamestate, color)
+
 	var moves = board.get_all_moves(gamestate, color)
 	moves = merge(moves[0], moves[1])
 	var value
 	var next_gamestate
-	var next_color = 'black' if color == 'white' else 'white'
-	var max_val = -INF
+	var max_val = -999
 	for piece in moves.keys():
 		for move in moves[piece]:
 			next_gamestate = board.get_gamestate_ifmove(gamestate, piece, move)
@@ -111,28 +119,28 @@ func max_gamestate(gamestate, color, alpha, beta, depth):
 
 func check_win(gamestate, color):
 	var win = true
+#	print(gamestate.size())
 	for piece in gamestate.values():
 		if piece.type == 'king' and piece.player != color:
 			win = false
 	return win
 
 func thread_caller(params):
-	if check_win(params[0], params[1]):
-		return INF
-	return max_gamestate(params[0], params[1], params[2], params[3], params[4])
+	return min_gamestate(params[0], params[1], params[2], params[3], params[4])
 
 func minmax_gamestate(gamestate, color):
 	var moves = board.get_all_moves(gamestate, color)
 	moves = merge(moves[0], moves[1])
-	var max_val = -INF
+	var max_val = -999
 	var best_move
 	var movekeys = moves.keys()
 	movekeys.shuffle()
 	var threads = []
 	for piece in movekeys:
 		for move in moves[piece]:
+			var next_gamestate = board.get_gamestate_ifmove(gamestate, piece, move)
 			var thread = Thread.new()
-			var ret = thread.start(self, "thread_caller", [gamestate, color, -INF, INF, 0])
+			var ret = thread.start(self, "thread_caller", [next_gamestate, opposite_color, -INF, INF, 0])
 			threads += [[piece, move, thread]]
 	for thread in threads:
 		var piece = thread[0]
@@ -140,8 +148,8 @@ func minmax_gamestate(gamestate, color):
 		thread = thread[2]
 		
 		var value = thread.wait_to_finish()
-		if value == INF:
-			print(piece, move, value)
+		print(piece.grid_position, move, value)
+		
 		if value >=  max_val:
 			best_move = [piece, move]
 			max_val = value
@@ -158,8 +166,9 @@ func process_turn(current_player):
 	var future = OS.get_ticks_msec()
 #	print(future-past)
 #	print(color, candidate)
-	print(candidate)
+	
 	emit_signal('movement_choice', candidate[0], candidate[1])
+
 
 
 class MoveSorter:
