@@ -7,3 +7,4 @@ lib/bin/*
 !lib/bin/.gitkeep
 **/*.o
 **/*.h.ghc
+*.ghc

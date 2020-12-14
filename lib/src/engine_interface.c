@@ -1,6 +1,8 @@
 #include <gdnative_api_struct.gen.h>
 #include <string.h>
 #include "engine.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 typedef struct user_data_struct {
 	char data[256];
@@ -20,7 +22,7 @@ GDCALLINGCONV void *engine_constructor(godot_object *p_instance, void *p_method_
 GDCALLINGCONV void engine_destructor(godot_object *p_instance, void *p_method_data, void *p_user_data);
 godot_variant engine_get_data(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant engine_get_piece(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
-
+godot_variant godot_get_board(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 // `gdnative_init` is a function that initializes our dynamic library.
 // Godot will give it a pointer to a structure that contains various bits of
 // information we may find useful among which the pointers to our API structures.
@@ -85,6 +87,10 @@ void GDN_EXPORT godot_nativescript_init(void *p_handle) {
 	get_piece.method = &engine_get_piece;
 
 	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "get_piece", attributes, get_piece);
+
+	godot_instance_method get_board = {NULL, NULL, NULL};
+	get_board.method = &godot_get_board;
+	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "get_board", attributes, get_board);
 }
 
 // In our constructor, allocate memory for our structure and fill
@@ -94,8 +100,11 @@ void GDN_EXPORT godot_nativescript_init(void *p_handle) {
 // identifier in case multiple objects are instantiated.
 GDCALLINGCONV void *engine_constructor(godot_object *p_instance, void *p_method_data) {
 	user_data_struct *user_data = api->godot_alloc(sizeof(user_data_struct));
-	strcpy(user_data->data, "World from GDNative!");
-	user_data->board = api->godot_alloc(sizeof(Board));
+	do {
+			user_data->board = (Board *) api->godot_alloc(sizeof(Board));
+	} while(user_data->board == NULL);
+	user_data->board->white = api->godot_alloc(sizeof(Player));
+	user_data->board->black = api->godot_alloc(sizeof(Player));
 	new_board(user_data->board);
 	fill_board(user_data->board);
 	return user_data;
@@ -105,7 +114,8 @@ GDCALLINGCONV void *engine_constructor(godot_object *p_instance, void *p_method_
 // object and we free our instances' member data.
 GDCALLINGCONV void engine_destructor(godot_object *p_instance, void *p_method_data, void *p_user_data) {
 	user_data_struct *user_data = (user_data_struct *)p_user_data;
-	api->godot_free(p_user_data);
+	free(user_data->board);
+	api->godot_free(user_data);
 }
 
 // Data is always sent and returned as variants so in order to
@@ -135,4 +145,39 @@ godot_variant engine_get_piece(godot_object *p_instance, void *p_method_data,
 	api->godot_variant_new_int(&ret, piece);
 
 	return ret;
+}
+
+
+godot_variant godot_get_board(godot_object *p_instance, void *p_method_data,
+				void *p_user_data, int p_num_args, godot_variant **p_args){
+	printf("there is an error\n");
+	user_data_struct *user_data = (user_data_struct *)p_user_data;
+	godot_dictionary dict;
+	printf("board: %d\n", user_data->board);
+	api->godot_dictionary_new(&dict);
+	for (int i=0; i < user_data->board->white->piece_count; i++){
+		printf("%d\n", i);
+		Piece * p = user_data->board->white->pieces[i];
+		godot_variant piecetype;
+		godot_vector2 vec;
+		api->godot_variant_new_int(&piecetype, p->piecetype);
+		api->godot_vector2_new(&vec, p->x, p->y);
+		godot_variant var_vec;
+		api->godot_variant_new_vector2(&var_vec, &vec);
+		api->godot_dictionary_set(&dict, &var_vec, &piecetype);
+	}
+	for (int i=0; i < user_data->board->black->piece_count; i++){
+		Piece * p = user_data->board->black->pieces[i];
+		godot_variant piecetype;
+		godot_vector2 vec;
+		api->godot_variant_new_int(&piecetype, p->piecetype);
+		api->godot_vector2_new(&vec, p->x, p->y);
+		godot_variant var_vec;
+		api->godot_variant_new_vector2(&var_vec, &vec);
+		api->godot_dictionary_set(&dict, &var_vec, &piecetype);
+	}
+
+	godot_variant var_dict;
+	api->godot_variant_new_dictionary(&var_dict, &dict);
+	return var_dict;
 }

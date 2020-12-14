@@ -1,7 +1,7 @@
 extends TileMap
 var Piece = load('res://Piece.tscn')
 
-const player_num =0
+const player_num =1
 signal ai_turn(current_player)
 const test_num = 0
 

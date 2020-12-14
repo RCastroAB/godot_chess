@@ -2,7 +2,7 @@ extends Node
 
 var board
 signal movement_choice(piece, position)
-const MAX_DEPTH = 2
+const MAX_DEPTH = 3
 var opposite_color
 
 export var piece_vals = {
