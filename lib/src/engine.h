@@ -6,7 +6,7 @@ typedef struct piece {
   int x;
   int y;
   enum PieceType piecetype;
-  int color;
+  enum Player color;
 } Piece;
 
 typedef struct player {
@@ -20,7 +20,7 @@ typedef struct board {
   Player *white;
   Player *black;
   Piece grid[8][8];
-  int moves[150][2];
+  int moves[150][6];
 } Board;
 
 
@@ -29,3 +29,7 @@ void new_board(Board *board);
 void fill_board();
 
 enum PieceType get_piece(Board *board, int x, int y);
+
+void proccess_moves(Board *board, enum Player player);
+
+void print_moves(Board *board);

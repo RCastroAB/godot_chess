@@ -14,7 +14,7 @@ func _ready():
 	$AI.set_color('white')
 	$AI2.set_color('black')
 	
-	var ret = engine.get_board()
+	var ret = engine.print_moves()
 	print(ret)
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -19,10 +19,6 @@ config/name="Chess"
 run/main_scene="res://Chess.tscn"
 config/icon="res://icon.png"
 
-[debug]
-
-settings/stdout/print_fps=true
-
 [rendering]
 
 environment/default_environment="res://default_env.tres"

@@ -23,6 +23,7 @@ GDCALLINGCONV void engine_destructor(godot_object *p_instance, void *p_method_da
 godot_variant engine_get_data(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant engine_get_piece(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_get_board(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
+godot_variant godot_print_moves(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 // `gdnative_init` is a function that initializes our dynamic library.
 // Godot will give it a pointer to a structure that contains various bits of
 // information we may find useful among which the pointers to our API structures.
@@ -91,6 +92,11 @@ void GDN_EXPORT godot_nativescript_init(void *p_handle) {
 	godot_instance_method get_board = {NULL, NULL, NULL};
 	get_board.method = &godot_get_board;
 	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "get_board", attributes, get_board);
+
+	godot_instance_method method_print_moves = {NULL, NULL, NULL};
+	method_print_moves.method = &godot_print_moves;
+	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "print_moves", attributes, method_print_moves);
+
 }
 
 // In our constructor, allocate memory for our structure and fill
@@ -153,7 +159,6 @@ godot_variant godot_get_board(godot_object *p_instance, void *p_method_data,
 	printf("there is an error\n");
 	user_data_struct *user_data = (user_data_struct *)p_user_data;
 	godot_dictionary dict;
-	printf("board: %d\n", user_data->board);
 	api->godot_dictionary_new(&dict);
 	for (int i=0; i < user_data->board->white->piece_count; i++){
 		printf("%d\n", i);
@@ -180,4 +185,14 @@ godot_variant godot_get_board(godot_object *p_instance, void *p_method_data,
 	godot_variant var_dict;
 	api->godot_variant_new_dictionary(&var_dict, &dict);
 	return var_dict;
+}
+
+godot_variant godot_print_moves(godot_object *p_instance, void *p_method_data,
+				void *p_user_data, int p_num_args, godot_variant **p_args){
+	user_data_struct *user_data = (user_data_struct *)p_user_data;
+	proccess_moves(user_data->board, WHITE);
+	print_moves(user_data->board);
+	godot_variant ret;
+	api->godot_variant_new_int(&ret, 1);
+	return ret;
 }
