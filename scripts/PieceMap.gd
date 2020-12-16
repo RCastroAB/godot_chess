@@ -1,5 +1,5 @@
 extends TileMap
-var Piece = load('res://Piece.tscn')
+var Piece = load('res://scenes/Piece.tscn')
 
 const player_num =1
 signal ai_turn(current_player)

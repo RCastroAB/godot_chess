@@ -1,7 +1,7 @@
 extends Node2D
 
 var current_player = 1
-var current_moves = [[]]
+var current_moves = [PoolIntArray()]
 
 # Declare member variables here. Examples:
 # var a = 2
