@@ -24,6 +24,8 @@ godot_variant engine_get_data(godot_object *p_instance, void *p_method_data, voi
 godot_variant engine_get_piece(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_get_board(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_print_moves(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
+godot_variant godot_move_piece(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
+godot_variant godot_get_moves(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 // `gdnative_init` is a function that initializes our dynamic library.
 // Godot will give it a pointer to a structure that contains various bits of
 // information we may find useful among which the pointers to our API structures.
@@ -96,6 +98,16 @@ void GDN_EXPORT godot_nativescript_init(void *p_handle) {
 	godot_instance_method method_print_moves = {NULL, NULL, NULL};
 	method_print_moves.method = &godot_print_moves;
 	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "print_moves", attributes, method_print_moves);
+
+
+	godot_instance_method method_move_piece = {NULL, NULL, NULL};
+	method_move_piece.method = &godot_move_piece;
+	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "move_piece", attributes, method_move_piece);
+
+
+	godot_instance_method method_get_moves = {NULL, NULL, NULL};
+	method_get_moves.method = &godot_get_moves;
+	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "get_moves", attributes, method_get_moves);
 
 }
 
@@ -195,4 +207,56 @@ godot_variant godot_print_moves(godot_object *p_instance, void *p_method_data,
 	godot_variant ret;
 	api->godot_variant_new_int(&ret, 1);
 	return ret;
+}
+
+
+godot_variant godot_move_piece(godot_object *p_instance, void *p_method_data,
+				void *p_user_data, int p_num_args, godot_variant **p_args){
+	user_data_struct *user_data = (user_data_struct *)p_user_data;
+	proccess_moves(user_data->board, WHITE);
+	int x,y,new_x, new_y;
+	x = user_data->board->moves[0][0];
+	y = user_data->board->moves[0][1];
+	new_x = user_data->board->moves[0][2];
+	new_y = user_data->board->moves[0][3];
+	move_piece(user_data->board, WHITE, x, y, new_x, new_y);
+	godot_variant ret;
+	api->godot_variant_new_int(&ret, 1);
+	return ret;
+}
+
+
+
+godot_variant godot_get_moves(godot_object *p_instance, void *p_method_data,
+				void *p_user_data, int p_num_args, godot_variant **p_args){
+	user_data_struct *user_data = (user_data_struct *)p_user_data;
+	if (p_num_args < 1){
+		godot_variant ret;
+		api->godot_variant_new_int(&ret, 1);
+		return ret;
+	}
+	enum Player p;
+	p = api->godot_variant_as_int(p_args[0]);
+	proccess_moves(user_data->board, p);
+
+	godot_array array;
+	api->godot_array_new(&array);
+	for (int i=0; user_data->board->moves[i][0] != -1; i++){
+		godot_pool_int_array move;
+		api->godot_pool_int_array_new(&move);
+		for (int j=0; j < 6; j++){
+			godot_int coord = user_data->board->moves[i][j];
+
+			api->godot_pool_int_array_push_back(&move, coord);
+		}
+		godot_variant var_move;
+		api->godot_variant_new_pool_int_array(&var_move, &move);
+		api->godot_array_push_back(&array, &var_move);
+		api->godot_pool_int_array_destroy(&move);
+	}
+
+	godot_variant varray;
+	api->godot_variant_new_array(&varray, &array);
+	api->godot_array_destroy(&array);
+	return varray;
 }

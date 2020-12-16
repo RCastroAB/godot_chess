@@ -1,5 +1,7 @@
 extends Node2D
 
+var current_player = 1
+var current_moves = [[]]
 
 # Declare member variables here. Examples:
 # var a = 2
@@ -14,9 +16,18 @@ func _ready():
 	$AI.set_color('white')
 	$AI2.set_color('black')
 	
-	var ret = engine.print_moves()
-	print(ret)
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
+
+
+func toggle_player():
+	current_player = 2 if current_player == 1 else 1
+
+
+func process_moves(player):
+	current_moves = engine.get_moves(player)
+
+func get_all_moves(player):
+	return engine.get_moves(player)

@@ -1,6 +1,6 @@
 
 enum PieceType {NONE=0, PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING};
-enum Player {WHITE, BLACK};
+enum Player {EMPTY, WHITE, BLACK};
 
 typedef struct piece {
   int x;
@@ -33,3 +33,5 @@ enum PieceType get_piece(Board *board, int x, int y);
 void proccess_moves(Board *board, enum Player player);
 
 void print_moves(Board *board);
+
+int move_piece(Board *board, enum Player player, int x, int y, int new_x, int new_y);

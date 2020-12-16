@@ -115,6 +115,16 @@ int add_pawn_moves(Board *board, Piece *piece, int index){
     }
   }
 
+  if (color == WHITE){
+    if (y==6){
+      set_move_noattack(board, x, y, x, y-2, index);
+    }
+  } else {
+    if (y==1){
+      set_move_noattack(board, x, y, x, y+2, index);
+    }
+  }
+
   if (color== WHITE){
     set_move_basicattack(board, x, y, x+1, y-1, index, color);
     set_move_basicattack(board, x, y, x-1, y-1, index, color);
@@ -134,13 +144,11 @@ int add_rook_moves(Board *board, Piece *piece, int index){
   };
   int x = piece->x;
   int y = piece->y;
-  printf("original_pos: %d, %d\n", x,y);
   enum Player color = piece->color;
   for (int i=0; i <4; i++){
     for (int steps =1;1;steps++){
       int new_x = x +(directions[i][0]*steps);
       int new_y = y +(directions[i][1]*steps);
-      printf("%d: %d, %d (%d)\n", i, new_x, new_y, board->grid[new_x][new_y].piecetype);
       if (0 > new_x || new_x > 7 || 0 > new_y  || new_y > 7)
         break;
       set_move_moveattack(board, x, y, new_x, new_y, index, color);
@@ -185,13 +193,11 @@ int add_bishop_moves(Board *board, Piece *piece, int index){
   };
   int x = piece->x;
   int y = piece->y;
-  printf("original_pos: %d, %d\n", x,y);
   enum Player color = piece->color;
   for (int i=0; i <4; i++){
     for (int steps =1;1;steps++){
       int new_x = x +(directions[i][0]*steps);
       int new_y = y +(directions[i][1]*steps);
-      printf("%d: %d, %d (%d)\n", i, new_x, new_y, board->grid[new_x][new_y].piecetype);
       if (0 > new_x || new_x > 7 || 0 > new_y  || new_y > 7)
         break;
       set_move_moveattack(board, x, y, new_x, new_y, index, color);
@@ -239,13 +245,11 @@ int add_queen_moves(Board *board, Piece *piece, int index){
   };
   int x = piece->x;
   int y = piece->y;
-  printf("original_pos: %d, %d\n", x,y);
   enum Player color = piece->color;
   for (int i=0; i <8; i++){
     for (int steps =1;1;steps++){
       int new_x = x +(directions[i][0]*steps);
       int new_y = y +(directions[i][1]*steps);
-      printf("%d: %d, %d (%d)\n", i, new_x, new_y, board->grid[new_x][new_y].piecetype);
       if (0 > new_x || new_x > 7 || 0 > new_y  || new_y > 7)
         break;
       set_move_moveattack(board, x, y, new_x, new_y, index, color);
@@ -290,7 +294,6 @@ void proccess_moves(Board *board, enum Player player){
   int index = 0;
   if (player == WHITE){
     for (int i=0; i<board->white->piece_count; i++){
-      printf("white idx: %d\nindex: %d\n", i, index);
       index = add_moves(board, board->white->pieces[i], index);
     }
   } else {
@@ -309,4 +312,70 @@ void print_moves(Board *board){
       board->moves[i][2], board->moves[i][3]);
     i++;
   }
+}
+
+
+void attack_piece(Board *board, enum Player player, int attx, int atty){
+  board->grid[attx][atty].piecetype = NONE;
+  board->grid[attx][atty].color = EMPTY;
+  player = player == WHITE ? BLACK : WHITE;
+
+  if (player == WHITE){
+    // find piece to remove
+    int i;
+    for (i=0; i < board->white->piece_count; i++){
+      if (board->white->pieces[i]->x == attx && board->white->pieces[i]->y == atty){
+        break;
+      }
+    }
+    for(i=i+1; i < board->white->piece_count; i++){
+      board->white->pieces[i-1] = board->white->pieces[i];
+    }
+    board->white->piece_count--;
+  } else {
+    int i;
+    for (i=0; i < board->black->piece_count; i++){
+      if (board->black->pieces[i]->x == attx && board->black->pieces[i]->y == atty){
+        break;
+      }
+    }
+    for(i=i+1; i < board->black->piece_count; i++){
+      board->black->pieces[i-1] = board->black->pieces[i];
+    }
+    board->black->piece_count--;
+  }
+}
+
+Player *get_player(Board *board, enum Player player){
+  return player== WHITE ? board->white : board->black;
+}
+
+int move_piece(Board *board, enum Player player, int x, int y, int new_x, int new_y){
+  int i;
+  for (i=0; 1; i++){
+    if (board->moves[i][0] == -1){
+      return 0;
+    }
+    if (board->moves[i][0] == x && board->moves[i][1] == y &&
+      board->moves[i][2] == new_x && board->moves[i][3] == new_y){
+      break;
+    }
+  }
+  if (board->moves[i][4] != -1){
+    attack_piece(board, player, board->moves[i][4], board->moves[i][5]);
+  }
+  board->grid[new_x][new_y] = board->grid[x][y];
+  board->grid[new_x][new_y].x = new_x;
+  board->grid[new_x][new_y].y = new_y;
+  board->grid[x][y].piecetype = NONE;
+  board->grid[x][y].color = EMPTY;
+  Player *p = get_player(board, player);
+  for (i=0; i<p->piece_count; i++){
+    if (p->pieces[i]->x == x && p->pieces[i]->y == y){
+      p->pieces[i] = &(board->grid[new_x][new_y]);
+      break;
+    }
+  }
+
+  return 1;
 }

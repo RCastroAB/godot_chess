@@ -3,8 +3,8 @@ make: engine.o engine_interface.o
 
 
 engine_interface.o: engine_interface.c
-	gcc -std=c11 -fPIC -c -I../godot_headers engine_interface.c -o engine_interface.o
+	gcc -std=c11 -fPIC -O3 -c -I../godot_headers engine_interface.c -o engine_interface.o
 
 
 engine.o: engine.c
-	gcc -std=c11 -fPIC -c -I../godot_headers engine.c -o engine.o
+	gcc -std=c11 -fPIC -O3 -c -I../godot_headers engine.c -o engine.o
