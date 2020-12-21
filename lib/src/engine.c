@@ -318,9 +318,9 @@ void print_moves(Board *board){
 void attack_piece(Board *board, enum Player player, int attx, int atty){
   board->grid[attx][atty].piecetype = NONE;
   board->grid[attx][atty].color = EMPTY;
-  player = player == WHITE ? BLACK : WHITE;
+  enum Player enemy = player == WHITE ? BLACK : WHITE;
 
-  if (player == WHITE){
+  if (enemy == WHITE){
     // find piece to remove
     int i;
     for (i=0; i < board->white->piece_count; i++){

@@ -1,4 +1,7 @@
 extends TileMap
+# Role: rendering pieces and movements
+# and getting player input
+
 var Piece = load('res://scenes/Piece.tscn')
 
 const player_num =1
@@ -21,6 +24,8 @@ var valid_moves = []
 var valid_attacks = []
 
 var current_player = 'white'
+
+var piece_moves = {}
 
 func place_piece(piece, pos):
 	var position = map_to_world(pos)
@@ -96,7 +101,6 @@ func _process(delta):
 		selected.position = target
 		walking = false
 		selected.grid_position = world_to_map(target)
-		deselect()
 		$AudioStreamPlayer2D.position = target
 		$AudioStreamPlayer2D.play()
 		$AudioStreamPlayer2D.pitch_scale = rand_range(0.99, 1.1)
@@ -113,109 +117,22 @@ func _process(delta):
 
 	selected.position += velocity
 
-func _input(event):
-	if walking or winner:
-		return
-	if player_num == 1 and current_player == 'black':
-		return
-	
-	if event is InputEventMouseButton and event.pressed:
-		var mousepos
-		mousepos = get_local_mouse_position()
-		mousepos = world_to_map(mousepos)
-		if selected:
-			try_move(mousepos)
-		else:
-			try_select(mousepos)
+func _on_piece_selected(pos):
+	print(pos)
+	if pos in piece_moves.keys():
+		print('piece selected')
 
-func try_select(mousepos):
-	if not mousepos in position_pieces.keys():
-		return
-	var piece = position_pieces[mousepos]
-	if piece.player != current_player:
-		return
-	selected = piece
-	valid_moves = calculate_moves(position_pieces, selected)
-	valid_attacks = calculate_attacks(position_pieces, selected)
-	draw_overlay()
 
-func check_valid_move(endpos):
-	if endpos.x < 0 or endpos.x > 7:
-		return false
-	if endpos.y < 0 or endpos.y > 7:
-		return false
-	return true
-
-func calculate_moves(gamestate, selected):
-	var moves = selected.get_moves()
-	var possible_moves =[]
-	if not selected.moved:
-		moves += selected.get_special_moves()
+func _on_moves_processed(moves):
+	piece_moves = {}
 	for move in moves:
-		var endpos = selected.grid_position
-		while check_valid_move(endpos+ move):
-			endpos += move
-			if endpos in gamestate.keys():
-				break
-			possible_moves += [endpos]
-			if not selected.repeat:
-				break
-	return possible_moves
-
-func calculate_attacks(gamestate, selected):
-	var possible_attacks = []
-	var attacks = selected.get_attacks()
-	for attack in attacks:
-		var endpos = selected.grid_position
-		while true:
-			endpos = endpos + attack
-			if not check_valid_move(endpos):
-				break
-			if endpos in gamestate.keys():
-				if gamestate[endpos].player != selected.player:
-					possible_attacks += [endpos]
-				break
-			if not selected.repeat:
-				break
-	return possible_attacks
-
-func try_move(mousepos):
-	if mousepos in valid_moves:
-		move(mousepos)
-	elif mousepos in valid_attacks:
-		attack(mousepos)
-	elif mousepos == selected.grid_position:
-		deselect()
-
-func deselect():
-	clear_overlay()
-	selected = null
-	valid_attacks = []
-	valid_moves = []
-	win()
-
-func move(endpos):
-	target = map_to_world(endpos) + cell_size/2
-	velocity = (target - selected.position) * speed
-	walking = true
-	selected.moved = true
-	position_pieces[endpos] = selected
-	position_pieces.erase(selected.grid_position)
-	
-
-func attack(endpos):
-	if position_pieces[endpos].type == 'king':
-		winner = current_player
-	remove_child(position_pieces[endpos])
-	move(endpos)
-
-func clear_overlay():
-	for move in valid_moves:
-		set_cellv(move, 4)
-	for attack in valid_attacks:
-		set_cellv(attack, 4)
-
-
+		var start_pos = Vector2(move[0], move[1])
+		var end_pos = Vector2(move[2], move[3])
+		var att_pos = Vector2(move[4], move[5])
+		if start_pos in piece_moves.keys():
+			piece_moves[start_pos].append([end_pos, att_pos])
+		else:
+			piece_moves[start_pos] = [[end_pos, att_pos]]
 
 func draw_overlay():
 	for move in valid_moves:
@@ -247,16 +164,10 @@ func get_all_moves(gamestate, color):
 	for piece in gamestate.values():
 		if piece.player != color:
 			continue
-		all_moves[piece] = calculate_moves(position_pieces, piece)
-		all_attacks[piece] = calculate_attacks(position_pieces, piece)
 	
 	return [all_moves, all_attacks]
 
 
-func ai_move(piece, move):
-	try_select(piece.grid_position)
-	try_move(move)
-	
 func win():
 	if winner == null:
 		return
