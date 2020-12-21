@@ -24,4 +24,5 @@ func _input(event):
 		if piece_selected:
 			move_piece(mousepos)
 		else:
+			print(mousepos)
 			select_piece(mousepos)

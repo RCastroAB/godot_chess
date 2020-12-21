@@ -118,9 +118,11 @@ func _process(delta):
 	selected.position += velocity
 
 func _on_piece_selected(pos):
-	print(pos)
+	if selected:
+		return
 	if pos in piece_moves.keys():
-		print('piece selected')
+		valid_moves = piece_moves[pos]
+		draw_overlay()
 
 
 func _on_moves_processed(moves):
@@ -136,9 +138,8 @@ func _on_moves_processed(moves):
 
 func draw_overlay():
 	for move in valid_moves:
-		set_cellv(move, 3)
-	for attack in valid_attacks:
-		set_cellv(attack, 2)
+		set_cellv(move[0], 3)
+		set_cellv(move[1], 2)
 
 func get_gamestate():
 	return position_pieces
@@ -175,3 +176,5 @@ func win():
 		var piece = position_pieces[pos]
 		position_pieces.erase(pos)
 		create_piece(piece.type, pos.x, pos.y, winner)
+
+
