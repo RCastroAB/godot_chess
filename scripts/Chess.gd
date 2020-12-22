@@ -27,14 +27,14 @@ func _ready():
 	players[0].connect('select_piece', $PieceMap, '_on_piece_selected')
 	players[1].connect('select_piece', $PieceMap, '_on_piece_selected')
 	
-	
 	connect("moves_processed", $PieceMap, '_on_moves_processed')
 	
-
+	$PieceMap.set_board(engine.get_board())
+	$PieceMap.connect('move_piece', self, '_on_move_piece')
+	print($PieceMap.board)
+	print($PieceMap.position_pieces)
 	call_deferred('turn')
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+
 
 func emit_from_agent(pos):
 	emit_signal("select_piece", pos)
@@ -52,3 +52,9 @@ func process_moves(player):
 
 func get_all_moves(player):
 	return engine.get_moves(player)
+
+func _on_move_piece(old_place, new_place, color):
+	engine.move_piece(old_place.x, old_place.y,
+	new_place.x, new_place.y, color)
+	toggle_player()
+	call_deferred('turn')

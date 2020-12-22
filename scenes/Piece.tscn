@@ -3,7 +3,6 @@
 [ext_resource path="res://scripts/Piece.gd" type="Script" id=1]
 [ext_resource path="res://sprites/WIP_king.png" type="Texture" id=2]
 
-
 [node name="Piece" type="Node2D"]
 script = ExtResource( 1 )
 

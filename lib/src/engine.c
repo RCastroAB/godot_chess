@@ -108,20 +108,16 @@ int add_pawn_moves(Board *board, Piece *piece, int index){
   if (color == WHITE){
     if (board->grid[x][y-1].piecetype == NONE){
       set_move_noattack(board, x, y, x, y-1, index);
+      if (y==6){
+        set_move_noattack(board, x, y, x, y-2, index);
+      }
     }
   } else {
     if (board->grid[x][y+1].piecetype == NONE){
       set_move_noattack(board, x, y, x, y+1, index);
-    }
-  }
-
-  if (color == WHITE){
-    if (y==6){
-      set_move_noattack(board, x, y, x, y-2, index);
-    }
-  } else {
-    if (y==1){
-      set_move_noattack(board, x, y, x, y+2, index);
+      if (y==1){
+        set_move_noattack(board, x, y, x, y+2, index);
+      }
     }
   }
 
@@ -352,6 +348,8 @@ Player *get_player(Board *board, enum Player player){
 
 int move_piece(Board *board, enum Player player, int x, int y, int new_x, int new_y){
   int i;
+
+  // OPTIM: include the index of the move in the interface for quicker access
   for (i=0; 1; i++){
     if (board->moves[i][0] == -1){
       return 0;

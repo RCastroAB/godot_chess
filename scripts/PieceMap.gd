@@ -4,12 +4,14 @@ extends TileMap
 
 var Piece = load('res://scenes/Piece.tscn')
 
+signal move_piece(old_pos, new_pos, color)
+
 const player_num =1
-signal ai_turn(current_player)
 const test_num = 0
 
 var winner
 
+var board 
 export var speed = 2.0
 export var tolerance = 5.0
 
@@ -38,36 +40,7 @@ func create_piece(piecename, x, y, color):
 	place_piece(piece, Vector2(x,y))
 	piece.create_piece(piecename, color)
 	add_child(piece)
-#	print(piece.type, piece.get_moves())
 
-
-func fill_board(color):
-	var yoffset
-	var piecename
-	
-	if color == 'black':
-		yoffset = 0
-	else:
-		yoffset = 7
-	var piecenames = [
-		'rook', 
-		'knight',
-		'bishop',
-		'king',
-		'queen',
-		'bishop',
-		'knight',
-		'rook'
-	]
-	
-	for i in range(piecenames.size()):
-		piecename = piecenames[i]
-		create_piece(piecename, i, yoffset, color)
-	
-	
-	for i in range(8):
-		create_piece('pawn', i, abs(1- yoffset), color)
-	
 
 # Declare member variables here. Examples:
 # var a = 2
@@ -75,24 +48,7 @@ func fill_board(color):
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	if not test_num:
-		fill_board('white')
-		fill_board('black')
-	else:
-		match (test_num):
-			1:
-				create_piece('king', 0, 1, 'black')
-				create_piece('queen', 1, 7, 'white')
-				create_piece('king', 2, 2, 'white')
-			2:
-				create_piece('king', 0, 1, 'black')
-				create_piece('queen', 1, 1, 'white')
-				create_piece('king', 2, 2, 'white')
-	
-	if player_num == 0:
-		yield(get_tree(), "idle_frame")
-		emit_signal("ai_turn", current_player)
-	
+	pass
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	if not walking:
@@ -117,13 +73,6 @@ func _process(delta):
 
 	selected.position += velocity
 
-func _on_piece_selected(pos):
-	if selected:
-		return
-	if pos in piece_moves.keys():
-		valid_moves = piece_moves[pos]
-		draw_overlay()
-
 
 func _on_moves_processed(moves):
 	piece_moves = {}
@@ -135,46 +84,70 @@ func _on_moves_processed(moves):
 			piece_moves[start_pos].append([end_pos, att_pos])
 		else:
 			piece_moves[start_pos] = [[end_pos, att_pos]]
+	print('moves processed')
+	print(piece_moves)
 
-func draw_overlay():
+func check_valid_move(pos):
+	for move in valid_moves:
+		if pos == move[0]:
+			return true
+	return false
+
+func _on_piece_selected(pos):
+	if selected:
+		if selected == pos:
+			selected = null
+			clear_overlay(pos)
+		elif check_valid_move(pos):
+			var color = position_pieces[selected].player
+			color = 1 if color == 'white' else 2
+			set_moving_mode(selected, pos)
+			emit_signal('move_piece', selected, pos, color)
+			selected = null
+	elif pos in piece_moves.keys():
+		selected = pos
+		valid_moves = piece_moves[pos]
+		draw_overlay(pos)
+
+func set_moving_mode(selected, pos):
+	print('moving mode')
+	var piece = position_pieces[selected]
+	position_pieces.erase(selected)
+	position_pieces[pos] = piece
+	
+	piece.position = map_to_world(pos) + Vector2(1,1) * cell_size/2
+	clear_overlay(selected)
+
+func draw_overlay(pos):
+	print(board.keys())
 	for move in valid_moves:
 		set_cellv(move[0], 3)
-		set_cellv(move[1], 2)
+		if  move[1] in board.keys():
+			set_cellv(move[1], 2)
+	set_cellv(pos, 4)
 
-func get_gamestate():
-	return position_pieces
+func clear_overlay(pos):
+	for move in valid_moves:
+		set_cellv(move[0], -1)
+		set_cellv(move[1], -1)
+	set_cellv(pos, -1)
 
-func get_gamestate_ifmove(gamestate, piece, move):
-	var new_gamestate = gamestate.duplicate()
-	for pos in gamestate.keys():
-		if gamestate[pos] == piece:
-			new_gamestate.erase(pos)
-			break
-	new_gamestate[move] = piece
-	return new_gamestate
 
-func get_all_moves(gamestate, color):
-	var lose = true
-	for piece in gamestate.values():
-		if piece.type=='king' and piece.player==color:
-			lose = false
-	if lose:
-		return [{}, {}]
-	var all_moves = {}
-	var all_attacks = {}
-	for piece in gamestate.values():
-		if piece.player != color:
-			continue
+func set_board(board):
+	var piecenames = {
+		1: 'pawn',
+		2: 'rook',
+		3: 'knight',
+		4: 'bishop',
+		5: 'queen',
+		6: 'king'
+	}
+	print(board)
 	
-	return [all_moves, all_attacks]
-
-
-func win():
-	if winner == null:
-		return
-	for pos in position_pieces.keys():
-		var piece = position_pieces[pos]
-		position_pieces.erase(pos)
-		create_piece(piece.type, pos.x, pos.y, winner)
-
+	self.board = board
+	for pos in board.keys():
+		var piece_data = board[pos]
+		var piecename = piecenames[int(piece_data[0])]
+		var color = 'white' if piece_data[1] == 1 else 'black'
+		create_piece(piecename, pos.x, pos.y, color)
 

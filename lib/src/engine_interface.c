@@ -168,30 +168,28 @@ godot_variant engine_get_piece(godot_object *p_instance, void *p_method_data,
 
 godot_variant godot_get_board(godot_object *p_instance, void *p_method_data,
 				void *p_user_data, int p_num_args, godot_variant **p_args){
-	printf("there is an error\n");
 	user_data_struct *user_data = (user_data_struct *)p_user_data;
 	godot_dictionary dict;
 	api->godot_dictionary_new(&dict);
 	for (int i=0; i < user_data->board->white->piece_count; i++){
-		printf("%d\n", i);
 		Piece * p = user_data->board->white->pieces[i];
-		godot_variant piecetype;
-		godot_vector2 vec;
-		api->godot_variant_new_int(&piecetype, p->piecetype);
+		godot_vector2 vec, piece_data;
+		api->godot_vector2_new(&piece_data, p->piecetype, WHITE);
 		api->godot_vector2_new(&vec, p->x, p->y);
-		godot_variant var_vec;
+		godot_variant var_vec, var_piece_data;
 		api->godot_variant_new_vector2(&var_vec, &vec);
-		api->godot_dictionary_set(&dict, &var_vec, &piecetype);
+		api->godot_variant_new_vector2(&var_piece_data, &piece_data);
+		api->godot_dictionary_set(&dict, &var_vec, &var_piece_data);
 	}
 	for (int i=0; i < user_data->board->black->piece_count; i++){
 		Piece * p = user_data->board->black->pieces[i];
-		godot_variant piecetype;
-		godot_vector2 vec;
-		api->godot_variant_new_int(&piecetype, p->piecetype);
+		godot_vector2 vec, piece_data;
+		api->godot_vector2_new(&piece_data, p->piecetype, BLACK);
 		api->godot_vector2_new(&vec, p->x, p->y);
-		godot_variant var_vec;
+		godot_variant var_vec, var_piece_data;
+		api->godot_variant_new_vector2(&var_piece_data, &piece_data);
 		api->godot_variant_new_vector2(&var_vec, &vec);
-		api->godot_dictionary_set(&dict, &var_vec, &piecetype);
+		api->godot_dictionary_set(&dict, &var_vec, &var_piece_data);
 	}
 
 	godot_variant var_dict;
@@ -213,13 +211,15 @@ godot_variant godot_print_moves(godot_object *p_instance, void *p_method_data,
 godot_variant godot_move_piece(godot_object *p_instance, void *p_method_data,
 				void *p_user_data, int p_num_args, godot_variant **p_args){
 	user_data_struct *user_data = (user_data_struct *)p_user_data;
-	proccess_moves(user_data->board, WHITE);
-	int x,y,new_x, new_y;
-	x = user_data->board->moves[0][0];
-	y = user_data->board->moves[0][1];
-	new_x = user_data->board->moves[0][2];
-	new_y = user_data->board->moves[0][3];
-	move_piece(user_data->board, WHITE, x, y, new_x, new_y);
+	// proccess_moves(user_data->board, WHITE);
+	// Cant run without first procesing moves
+	int x,y,new_x, new_y, color;
+	x = api->godot_variant_as_int(p_args[0]);
+	y = api->godot_variant_as_int(p_args[1]);
+	new_x = api->godot_variant_as_int(p_args[2]);
+	new_y = api->godot_variant_as_int(p_args[3]);
+	color = api->godot_variant_as_int(p_args[4]);
+	move_piece(user_data->board, color, x, y, new_x, new_y);
 	godot_variant ret;
 	api->godot_variant_new_int(&ret, 1);
 	return ret;
