@@ -2,6 +2,7 @@ extends "res://scripts/Agent.gd"
 
 var piece_selected = false
 var piecemap
+var playing = false
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
@@ -18,6 +19,8 @@ func _ready():
 
 
 func _input(event):
+	if not playing:
+		return
 	if event is InputEventMouseButton and not event.pressed:
 		var mousepos = event.position
 		mousepos = piecemap.world_to_map(mousepos)

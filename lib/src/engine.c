@@ -43,6 +43,9 @@ if (0 <= new_x && new_x <= 7 && 0 <= new_y  && new_y <= 7){ \
 }
 
 
+#define check_valid_pos(x, y) \
+((0 <= x && x < 8) && (0 <= y && y < 8))
+
 
 void new_board(Board *board){
 
@@ -60,6 +63,7 @@ void new_board(Board *board){
       board->grid[i][j].piecetype = NONE;
       board->grid[i][j].x = i;
       board->grid[i][j].y = j;
+      board->grid[i][j].id = 0;
     }
   }
 
@@ -69,14 +73,16 @@ void new_board(Board *board){
 
 void fill_board(Board *board){
   enum PieceType preset[] = {ROOK, KNIGHT, BISHOP, KING, QUEEN, BISHOP, KNIGHT, ROOK};
-
+  int id = 1;
   for (int i=0; i <8; i++){
     board->grid[i][1].piecetype = PAWN;
     board->grid[i][1].color = BLACK;
+    board->grid[i][1].id = id++;
     board->black->pieces[i] = &(board->grid[i][1]);
 
     board->grid[i][6].piecetype = PAWN;
     board->grid[i][6].color = WHITE;
+    board->grid[i][6].id = id++;
     board->white->pieces[i] = &(board->grid[i][6]);
   }
 
@@ -84,11 +90,13 @@ void fill_board(Board *board){
   for (int i=0; i<8; i++){
     board->grid[i][0].piecetype = preset[i];
     board->grid[i][0].color = BLACK;
+    board->grid[i][0].id = id++;
     board->black->pieces[8+i] = &(board->grid[i][0]);
 
 
     board->grid[i][7].piecetype = preset[i];
     board->grid[i][7].color = WHITE;
+    board->grid[i][7].id = id++;
     board->white->pieces[8+i] = &(board->grid[i][7]);
   }
   board->black->piece_count = 16;
@@ -376,4 +384,51 @@ int move_piece(Board *board, enum Player player, int x, int y, int new_x, int ne
   }
 
   return 1;
+}
+
+
+int check_check(Board *board, enum Player color){
+  Player *player;
+  enum Player enemy;
+  if (color == WHITE){
+    enemy = BLACK;
+    player = board->white;
+  } else {
+    enemy = WHITE;
+    player = board->black;
+  }
+  Piece *king;
+  for (int i=0; i<player->piece_count; i++){
+    if (player->pieces[i]->piecetype == KING){
+      king = player->pieces[i];
+      break;
+    }
+  }
+
+  //CHECK KNIGHTS
+  int knight_moves[8][2] = {
+    {2,1},
+    {2,-1},
+    {-2,1},
+    {-2,-1},
+    {1,2},
+    {-1,2},
+    {-1,-2},
+    {1,-2},
+  };
+  int x = king->x;
+  int y = king->y;
+  for (int i=0; i<8; i++){
+    int new_x = x+knight_moves[i][0], new_y = y+knight_moves[i][1];
+    if (check_valid_pos(new_x, new_y)){
+      if (board->grid[new_x][new_y].piecetype == KNIGHT && board->grid[new_x][new_y].color == enemy){
+        return 1;
+      }
+    }
+  }
+
+  //CHECK PAWN
+  
+
+  return 0;
 }

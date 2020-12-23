@@ -6,8 +6,8 @@ extends Node2D
 
 var current_player = 1
 var current_moves = [PoolIntArray()]
-var num_players = 1
-
+var num_players = 2
+signal new_board(board)
 
 signal moves_processed(moves)
 # Declare member variables here. Examples:
@@ -21,18 +21,20 @@ func _ready():
 	if num_players == 1:
 		players.append(load('res://scenes/Player.tscn').instance())
 		players.append(load('res://scenes/AI.tscn').instance())
+	elif num_players == 2:
+		players.append(load('res://scenes/Player.tscn').instance())
+		players.append(load('res://scenes/Player.tscn').instance())
 	add_child(players[0])
 	add_child(players[1])
 	
-	players[0].connect('select_piece', $PieceMap, '_on_piece_selected')
-	players[1].connect('select_piece', $PieceMap, '_on_piece_selected')
 	
 	connect("moves_processed", $PieceMap, '_on_moves_processed')
 	
 	$PieceMap.set_board(engine.get_board())
 	$PieceMap.connect('move_piece', self, '_on_move_piece')
-	print($PieceMap.board)
-	print($PieceMap.position_pieces)
+	
+	connect("new_board", $PieceMap, '_on_new_board')
+	
 	call_deferred('turn')
 
 
@@ -40,12 +42,19 @@ func emit_from_agent(pos):
 	emit_signal("select_piece", pos)
 
 func turn():
+	players[current_player-1].connect('select_piece', $PieceMap, '_on_piece_selected')
+	players[other_player()-1].disconnect('select_piece', $PieceMap, '_on_piece_selected')
+	players[current_player-1].playing = true
+	players[other_player()-1].playing = false
+	
 	current_moves = get_all_moves(current_player)
 	emit_signal("moves_processed", current_moves)
 
 func toggle_player():
 	current_player = 1 if current_player == 2 else 2
 
+func other_player():
+	return 1 if current_player == 2 else 2
 
 func process_moves(player):
 	current_moves = engine.get_moves(player)
@@ -57,4 +66,5 @@ func _on_move_piece(old_place, new_place, color):
 	engine.move_piece(old_place.x, old_place.y,
 	new_place.x, new_place.y, color)
 	toggle_player()
+	emit_signal('new_board', engine.get_board())
 	call_deferred('turn')

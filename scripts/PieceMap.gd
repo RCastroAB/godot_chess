@@ -6,7 +6,7 @@ var Piece = load('res://scenes/Piece.tscn')
 
 signal move_piece(old_pos, new_pos, color)
 
-const player_num =1
+const player_num =2
 const test_num = 0
 
 var winner
@@ -16,6 +16,7 @@ export var speed = 2.0
 export var tolerance = 5.0
 
 var position_pieces = {}
+var pieces = {}
 var selected
 
 var walking
@@ -33,12 +34,14 @@ func place_piece(piece, pos):
 	var position = map_to_world(pos)
 	piece.position = position + Vector2(1,1) * cell_size/2	
 	piece.grid_position = pos
-	position_pieces[pos] = piece
+	piece.target = piece.position
 
-func create_piece(piecename, x, y, color):
+func create_piece(piecename, x, y, color, id):
 	var piece = Piece.instance()
 	place_piece(piece, Vector2(x,y))
 	piece.create_piece(piecename, color)
+	piece.id = id
+	pieces[id] = piece
 	add_child(piece)
 
 
@@ -57,9 +60,9 @@ func _process(delta):
 		selected.position = target
 		walking = false
 		selected.grid_position = world_to_map(target)
-		$AudioStreamPlayer2D.position = target
-		$AudioStreamPlayer2D.play()
-		$AudioStreamPlayer2D.pitch_scale = rand_range(0.99, 1.1)
+#		$AudioStreamPlayer2D.position = target
+#		$AudioStreamPlayer2D.play()
+#		$AudioStreamPlayer2D.pitch_scale = rand_range(0.99, 1.1)
 #		print($AudioStreamPlayer2D.pitch_scale)
 		current_player = 'black' if current_player == 'white' else 'white'
 		if player_num == 1 and current_player == 'black' and not winner:
@@ -99,10 +102,9 @@ func _on_piece_selected(pos):
 			selected = null
 			clear_overlay(pos)
 		elif check_valid_move(pos):
-			var color = position_pieces[selected].player
-			color = 1 if color == 'white' else 2
-			set_moving_mode(selected, pos)
+			var color = board[selected][2]
 			emit_signal('move_piece', selected, pos, color)
+			clear_overlay(selected)
 			selected = null
 	elif pos in piece_moves.keys():
 		selected = pos
@@ -115,8 +117,7 @@ func set_moving_mode(selected, pos):
 	position_pieces.erase(selected)
 	position_pieces[pos] = piece
 	
-	piece.position = map_to_world(pos) + Vector2(1,1) * cell_size/2
-	clear_overlay(selected)
+	piece.target = map_to_world(pos) + Vector2(1,1) * cell_size/2
 
 func draw_overlay(pos):
 	print(board.keys())
@@ -142,12 +143,23 @@ func set_board(board):
 		5: 'queen',
 		6: 'king'
 	}
-	print(board)
 	
 	self.board = board
 	for pos in board.keys():
 		var piece_data = board[pos]
-		var piecename = piecenames[int(piece_data[0])]
-		var color = 'white' if piece_data[1] == 1 else 'black'
-		create_piece(piecename, pos.x, pos.y, color)
+		var piecename = piecenames[int(piece_data[1])]
+		var color = 'white' if piece_data[2] == 1 else 'black'
+		create_piece(piecename, pos.x, pos.y, color, piece_data[0])
 
+
+func _on_new_board(board):
+	for child in get_children():
+		var exists = false
+		for piece_pos in board.keys():
+			if child.id == board[piece_pos][0]:
+				exists = true
+				child.target = map_to_world(piece_pos) + cell_size/2
+		if not exists:
+			pieces.erase(child.id)
+			remove_child(child)
+	self.board = board

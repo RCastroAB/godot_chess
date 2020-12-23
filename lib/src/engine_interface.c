@@ -132,7 +132,9 @@ GDCALLINGCONV void *engine_constructor(godot_object *p_instance, void *p_method_
 // object and we free our instances' member data.
 GDCALLINGCONV void engine_destructor(godot_object *p_instance, void *p_method_data, void *p_user_data) {
 	user_data_struct *user_data = (user_data_struct *)p_user_data;
-	free(user_data->board);
+	api->godot_free(user_data->board->white);
+	api->godot_free(user_data->board->black);
+	api->godot_free(user_data->board);
 	api->godot_free(user_data);
 }
 
@@ -173,21 +175,23 @@ godot_variant godot_get_board(godot_object *p_instance, void *p_method_data,
 	api->godot_dictionary_new(&dict);
 	for (int i=0; i < user_data->board->white->piece_count; i++){
 		Piece * p = user_data->board->white->pieces[i];
-		godot_vector2 vec, piece_data;
-		api->godot_vector2_new(&piece_data, p->piecetype, WHITE);
+		godot_vector2 vec;
+		godot_vector3 piece_data;
+		api->godot_vector3_new(&piece_data, p->id, p->piecetype, WHITE);
 		api->godot_vector2_new(&vec, p->x, p->y);
 		godot_variant var_vec, var_piece_data;
 		api->godot_variant_new_vector2(&var_vec, &vec);
-		api->godot_variant_new_vector2(&var_piece_data, &piece_data);
+		api->godot_variant_new_vector3(&var_piece_data, &piece_data);
 		api->godot_dictionary_set(&dict, &var_vec, &var_piece_data);
 	}
 	for (int i=0; i < user_data->board->black->piece_count; i++){
 		Piece * p = user_data->board->black->pieces[i];
-		godot_vector2 vec, piece_data;
-		api->godot_vector2_new(&piece_data, p->piecetype, BLACK);
+		godot_vector2 vec;
+		godot_vector3 piece_data;
+		api->godot_vector3_new(&piece_data, p->id, p->piecetype, BLACK);
 		api->godot_vector2_new(&vec, p->x, p->y);
 		godot_variant var_vec, var_piece_data;
-		api->godot_variant_new_vector2(&var_piece_data, &piece_data);
+		api->godot_variant_new_vector3(&var_piece_data, &piece_data);
 		api->godot_variant_new_vector2(&var_vec, &vec);
 		api->godot_dictionary_set(&dict, &var_vec, &var_piece_data);
 	}

@@ -7,12 +7,14 @@ typedef struct piece {
   int y;
   enum PieceType piecetype;
   enum Player color;
+  int id;
 } Piece;
 
 typedef struct player {
   int piece_count;
   int checked;
   Piece *pieces[16];
+  Piece *king;
 } Player;
 
 
