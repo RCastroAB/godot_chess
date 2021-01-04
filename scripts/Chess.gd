@@ -22,6 +22,7 @@ func _ready():
 	if num_players == 1:
 		players.append(load('res://scenes/Player.tscn').instance())
 		players.append(load('res://scenes/AI.tscn').instance())
+		$PieceMap.connect('move_piece', players[1], '_on_move_piece')
 	elif num_players == 2:
 		players.append(load('res://scenes/Player.tscn').instance())
 		players.append(load('res://scenes/Player.tscn').instance())
@@ -51,7 +52,7 @@ func turn():
 	var checkmate = engine.get_checkmate(current_player)
 	print('checkmate: ', checkmate)
 	if checkmate:
-		$Win/Label.text = "Player " + str(other_player()) + "Wins!"
+		$Win/Label.text = "Player " + str(other_player()) + " Wins!"
 		$Win.visible = true
 		return
 	current_moves = get_all_moves(current_player)
@@ -69,7 +70,7 @@ func process_moves(player):
 func get_all_moves(player):
 	return engine.get_moves(player)
 
-func _on_move_piece(old_place, new_place, color):
+func _on_move_piece(old_place, new_place, att_place, color):
 	engine.move_piece(old_place.x, old_place.y,
 	new_place.x, new_place.y, color)
 	toggle_player()

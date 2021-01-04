@@ -18,10 +18,10 @@ margin_bottom = 40.0
 [node name="Label" type="Label" parent="Win"]
 anchor_top = 1.0
 anchor_bottom = 1.0
-margin_left = 117.0
-margin_top = 215.0
-margin_right = 381.0
-margin_bottom = 320.0
+margin_left = 513.552
+margin_top = 36.4009
+margin_right = 777.552
+margin_bottom = 141.401
 text = "BLACK WINS"
 align = 1
 valign = 1

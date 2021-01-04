@@ -6,6 +6,7 @@
 
 typedef struct user_data_struct {
 	Board *boardcopy;
+	enum Player color;
 } user_data_struct;
 
 // GDNative supports a large collection of functions for calling back
@@ -22,6 +23,7 @@ GDCALLINGCONV void ai_destructor(godot_object *p_instance, void *p_method_data, 
 // godot_variant simple_get_data(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_init_board(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_print_board(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
+godot_variant godot_move_oponent(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 
 // `gdnative_init` is a function that initializes our dynamic library.
 // Godot will give it a pointer to a structure that contains various bits of
@@ -91,6 +93,11 @@ void GDN_EXPORT godot_nativescript_init(void *p_handle) {
 	method_print_board.method = &godot_print_board;
 	nativescript_api->godot_nativescript_register_method(p_handle, "AI", "print_board", attributes, method_print_board);
 
+
+	godot_instance_method method_move_oponent = { NULL, NULL, NULL };
+	method_move_oponent.method = &godot_move_oponent;
+	nativescript_api->godot_nativescript_register_method(p_handle, "AI", "move_oponent", attributes, method_move_oponent);
+
 }
 
 // In our constructor, allocate memory for our structure and fill
@@ -141,4 +148,20 @@ godot_variant godot_print_board(godot_object *p_instance, void *p_method_data,
 		}
 		printf("\n");
 	}
+}
+
+
+godot_variant godot_move_oponent(godot_object *p_instance, void *p_method_data,
+	void *p_user_data, int p_num_args, godot_variant **p_args){
+	user_data_struct *user_data = (user_data_struct *) p_user_data;
+	int x, y, new_x, new_y, attx, atty;
+	x = api->godot_variant_as_int(p_args[0]);
+	y = api->godot_variant_as_int(p_args[1]);
+	new_x = api->godot_variant_as_int(p_args[2]);
+	new_y = api->godot_variant_as_int(p_args[3]);
+	attx = api->godot_variant_as_int(p_args[4]);
+	atty = api->godot_variant_as_int(p_args[5]);
+
+	enum Player oponent = user_data->color == WHITE ? BLACK : WHITE;
+	force_move_piece(user_data->boardcopy, oponent, x, y, new_x, new_y, attx, atty);
 }

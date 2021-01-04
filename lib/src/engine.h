@@ -37,6 +37,7 @@ void proccess_moves(Board *board, enum Player player);
 void print_moves(Board *board);
 
 int move_piece(Board *board, enum Player player, int x, int y, int new_x, int new_y);
+int force_move_piece(Board *board, enum Player player, int x, int y, int new_x, int new_y, int attx, int atty);
 
 int check_check(Board *board, enum Player color);
 int check_mate(Board *board, enum Player color);

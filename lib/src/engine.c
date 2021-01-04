@@ -448,6 +448,26 @@ int move_piece(Board *board, enum Player player, int x, int y, int new_x, int ne
   return 1;
 }
 
+int force_move_piece(Board *board, enum Player player, int x, int y, int new_x, int new_y, int attx, int atty ){
+  if (attx != -1){
+    attack_piece(board, player, attx, atty);
+  }
+  board->grid[new_x][new_y] = board->grid[x][y];
+  board->grid[new_x][new_y].x = new_x;
+  board->grid[new_x][new_y].y = new_y;
+  board->grid[x][y].piecetype = NONE;
+  board->grid[x][y].color = EMPTY;
+  Player *p = get_player(board, player);
+  for (int i=0; i<p->piece_count; i++){
+    if (p->pieces[i]->x == x && p->pieces[i]->y == y){
+      p->pieces[i] = &(board->grid[new_x][new_y]);
+      break;
+    }
+  }
+
+  return 1;
+}
+
 
 int check_check(Board *board, enum Player color){
   Player *player;

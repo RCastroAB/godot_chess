@@ -4,7 +4,7 @@ extends TileMap
 
 var Piece = load('res://scenes/Piece.tscn')
 
-signal move_piece(old_pos, new_pos, color)
+signal move_piece(old_pos, new_pos, att_pos, color)
 
 const player_num =2
 const test_num = 0
@@ -103,7 +103,8 @@ func _on_piece_selected(pos):
 			clear_overlay(pos)
 		elif check_valid_move(pos):
 			var color = board[selected][2]
-			emit_signal('move_piece', selected, pos, color)
+			#TODO: correct attack position
+			emit_signal('move_piece', selected, pos, pos, color)
 			clear_overlay(selected)
 			selected = null
 	elif pos in piece_moves.keys():
