@@ -2,7 +2,6 @@ extends "res://scripts/Agent.gd"
 
 var piece_selected = false
 var piecemap
-var playing = false
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"

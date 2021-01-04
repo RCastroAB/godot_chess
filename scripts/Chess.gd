@@ -6,18 +6,19 @@ extends Node2D
 
 var current_player = 1
 var current_moves = [PoolIntArray()]
-var num_players = 2
+var num_players = 1
 signal new_board(board)
 
 signal moves_processed(moves)
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
-onready var engine = preload('res://lib/bin/libengine.gdns').new()
+onready var engine = preload('res://lib/bin/libengine.gdns')
 
 var players = []
 
 func _ready():
+	engine = engine.new()
 	if num_players == 1:
 		players.append(load('res://scenes/Player.tscn').instance())
 		players.append(load('res://scenes/AI.tscn').instance())
@@ -47,6 +48,12 @@ func turn():
 	players[current_player-1].playing = true
 	players[other_player()-1].playing = false
 	
+	var checkmate = engine.get_checkmate(current_player)
+	print('checkmate: ', checkmate)
+	if checkmate:
+		$Win/Label.text = "Player " + str(other_player()) + "Wins!"
+		$Win.visible = true
+		return
 	current_moves = get_all_moves(current_player)
 	emit_signal("moves_processed", current_moves)
 

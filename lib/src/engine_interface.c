@@ -26,6 +26,7 @@ godot_variant godot_get_board(godot_object *p_instance, void *p_method_data, voi
 godot_variant godot_print_moves(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_move_piece(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_get_moves(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
+godot_variant godot_get_checkmate(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 // `gdnative_init` is a function that initializes our dynamic library.
 // Godot will give it a pointer to a structure that contains various bits of
 // information we may find useful among which the pointers to our API structures.
@@ -108,6 +109,12 @@ void GDN_EXPORT godot_nativescript_init(void *p_handle) {
 	godot_instance_method method_get_moves = {NULL, NULL, NULL};
 	method_get_moves.method = &godot_get_moves;
 	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "get_moves", attributes, method_get_moves);
+
+
+	godot_instance_method method_get_checkmate = {NULL, NULL, NULL};
+	method_get_checkmate.method = &godot_get_checkmate;
+	nativescript_api->godot_nativescript_register_method(p_handle, "Engine", "get_checkmate", attributes, method_get_checkmate);
+
 
 }
 
@@ -263,4 +270,15 @@ godot_variant godot_get_moves(godot_object *p_instance, void *p_method_data,
 	api->godot_variant_new_array(&varray, &array);
 	api->godot_array_destroy(&array);
 	return varray;
+}
+
+
+godot_variant godot_get_checkmate(godot_object *p_instance, void *p_method_data,
+	void *p_user_data, int p_num_args, godot_variant **p_args){
+	user_data_struct *user_data = (user_data_struct *)p_user_data;
+	enum Player p = api->godot_variant_as_int(p_args[0]);
+	int check = check_mate(user_data->board, p);
+	godot_variant ret;
+	api->godot_variant_new_int(&ret, check);
+	return ret;
 }

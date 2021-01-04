@@ -3,6 +3,8 @@ extends Node
 signal select_piece(piece_pos)
 signal move_piece(piece_pos)
 
+var playing = false
+
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
