@@ -97,8 +97,12 @@ func check_valid_move(pos):
 	return false
 
 func _on_piece_selected(pos):
-	if selected:
+	print('selected: ', selected)
+	pos = pos.round()
+	if not selected == null:
+		print('is selected')
 		if selected == pos:
+			print('deselected')
 			selected = null
 			clear_overlay(pos)
 		elif check_valid_move(pos):
@@ -108,8 +112,9 @@ func _on_piece_selected(pos):
 			clear_overlay(selected)
 			selected = null
 	elif pos in piece_moves.keys():
-		selected = pos
+		selected = pos.round()
 		valid_moves = piece_moves[pos]
+		print(valid_moves)
 		draw_overlay(pos)
 
 func set_moving_mode(selected, pos):
@@ -121,7 +126,6 @@ func set_moving_mode(selected, pos):
 	piece.target = map_to_world(pos) + Vector2(1,1) * cell_size/2
 
 func draw_overlay(pos):
-	print(board.keys())
 	for move in valid_moves:
 		set_cellv(move[0], 3)
 		if  move[1] in board.keys():

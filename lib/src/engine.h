@@ -23,6 +23,7 @@ typedef struct board {
   Player *black;
   Piece grid[8][8];
   int moves[150][6];
+  int num_moves;
 } Board;
 
 

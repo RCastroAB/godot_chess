@@ -515,22 +515,6 @@ int check_check(Board *board, enum Player color){
   //CHECK PAWN
   if (enemy == BLACK){
     int new_x, new_y;
-    new_x = x+1, new_y = y+1;
-    if (check_valid_pos(new_x, new_y)){
-      if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
-        printf("PAWN CHECK\n");
-        return 1;
-      }
-    }
-    new_x = x-1, new_y = y+1;
-    if (check_valid_pos(new_x, new_y)){
-      if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
-        printf("PAWN CHECK\n");
-        return 1;
-      }
-    }
-  } else {
-    int new_x, new_y;
     new_x = x+1, new_y = y-1;
     if (check_valid_pos(new_x, new_y)){
       if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
@@ -539,6 +523,22 @@ int check_check(Board *board, enum Player color){
       }
     }
     new_x = x-1, new_y = y-1;
+    if (check_valid_pos(new_x, new_y)){
+      if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
+        printf("PAWN CHECK\n");
+        return 1;
+      }
+    }
+  } else {
+    int new_x, new_y;
+    new_x = x+1, new_y = y+1;
+    if (check_valid_pos(new_x, new_y)){
+      if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
+        printf("PAWN CHECK\n");
+        return 1;
+      }
+    }
+    new_x = x-1, new_y = y+1;
     if (check_valid_pos(new_x, new_y)){
       if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
         printf("PAWN CHECK\n");

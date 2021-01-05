@@ -17,7 +17,8 @@ func select_piece(position):
 	emit_signal('select_piece', position)
 
 func move_piece(position):
-	pass
+	print('moving piece', position)
+	emit_signal('select_piece', position)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

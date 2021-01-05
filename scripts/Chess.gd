@@ -6,7 +6,7 @@ extends Node2D
 
 var current_player = 1
 var current_moves = [PoolIntArray()]
-var num_players = 1
+var num_players = 2
 signal new_board(board)
 
 signal moves_processed(moves)
@@ -22,6 +22,7 @@ func _ready():
 	if num_players == 1:
 		players.append(load('res://scenes/Player.tscn').instance())
 		players.append(load('res://scenes/AI.tscn').instance())
+		connect("moves_processed", players[1], '_on_moves_processed')
 		$PieceMap.connect('move_piece', players[1], '_on_move_piece')
 	elif num_players == 2:
 		players.append(load('res://scenes/Player.tscn').instance())
@@ -56,8 +57,10 @@ func turn():
 		$Win.visible = true
 		return
 	current_moves = get_all_moves(current_player)
+	
 	emit_signal("moves_processed", current_moves)
-
+	
+	
 func toggle_player():
 	current_player = 1 if current_player == 2 else 2
 

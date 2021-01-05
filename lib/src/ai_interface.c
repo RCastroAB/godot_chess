@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "engine.h"
 #include "ai.h"
-
+#include <stdlib.h>
 
 typedef struct user_data_struct {
 	Board *boardcopy;
@@ -24,6 +24,8 @@ GDCALLINGCONV void ai_destructor(godot_object *p_instance, void *p_method_data, 
 godot_variant godot_init_board(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_print_board(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_move_oponent(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
+godot_variant godot_set_moves(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
+godot_variant godot_get_move(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 
 // `gdnative_init` is a function that initializes our dynamic library.
 // Godot will give it a pointer to a structure that contains various bits of
@@ -98,6 +100,14 @@ void GDN_EXPORT godot_nativescript_init(void *p_handle) {
 	method_move_oponent.method = &godot_move_oponent;
 	nativescript_api->godot_nativescript_register_method(p_handle, "AI", "move_oponent", attributes, method_move_oponent);
 
+	godot_instance_method method_set_moves = { NULL, NULL, NULL };
+	method_set_moves.method = &godot_set_moves;
+	nativescript_api->godot_nativescript_register_method(p_handle, "AI", "set_moves", attributes, method_set_moves);
+
+	godot_instance_method method_get_move = { NULL, NULL, NULL };
+	method_get_move.method = &godot_get_move;
+	nativescript_api->godot_nativescript_register_method(p_handle, "AI", "get_move", attributes, method_get_move);
+
 }
 
 // In our constructor, allocate memory for our structure and fill
@@ -110,6 +120,7 @@ GDCALLINGCONV void *ai_constructor(godot_object *p_instance, void *p_method_data
 	user_data->boardcopy = api->godot_alloc(sizeof(Board));
 	user_data->boardcopy->white = api->godot_alloc(sizeof(Player));
 	user_data->boardcopy->black = api->godot_alloc(sizeof(Player));
+	srand(1);
 	return user_data;
 }
 
@@ -164,4 +175,44 @@ godot_variant godot_move_oponent(godot_object *p_instance, void *p_method_data,
 
 	enum Player oponent = user_data->color == WHITE ? BLACK : WHITE;
 	force_move_piece(user_data->boardcopy, oponent, x, y, new_x, new_y, attx, atty);
+}
+
+
+godot_variant godot_set_moves(godot_object *p_instance, void *p_method_data,
+	void *p_user_data, int p_num_args, godot_variant **p_args){
+	user_data_struct *user_data = (user_data_struct *) p_user_data;
+	godot_variant var_move_array, var_move;
+	var_move_array = *p_args[0];
+	godot_array move_array = api->godot_variant_as_array(&var_move_array);
+	int count = 0;
+	while(api->godot_array_size(&move_array)){
+		var_move = api->godot_array_pop_front(&move_array);
+		godot_pool_int_array move = api->godot_variant_as_pool_int_array(&var_move);
+		for (int i=0; i<6; i++){
+			user_data->boardcopy->moves[count][i] = api->godot_pool_int_array_get(&move, i);
+		}
+		count++;
+		printf("%d ", count);
+	}
+	user_data->boardcopy->num_moves = count;
+
+}
+
+
+godot_variant godot_get_move(godot_object *p_instance, void *p_method_data,
+	void *p_user_data, int p_num_args, godot_variant **p_args){
+	user_data_struct *user_data = (user_data_struct *) p_user_data;
+
+	int r = rand();
+	r = r % user_data->boardcopy->num_moves;
+	int *move = user_data->boardcopy->moves[r];
+	godot_pool_int_array move_array;
+	api->godot_pool_int_array_new(&move_array);
+	for (int i=0; i<6; i++){
+		api->godot_pool_int_array_push_back(&move_array, move[i]);
+	}
+	godot_variant var_move_array;
+	api->godot_variant_new_pool_int_array(&var_move_array, &move_array);
+
+	return var_move_array;
 }
