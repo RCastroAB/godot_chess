@@ -191,6 +191,8 @@ godot_variant godot_set_moves(godot_object *p_instance, void *p_method_data,
 		for (int i=0; i<6; i++){
 			user_data->boardcopy->moves[count][i] = api->godot_pool_int_array_get(&move, i);
 		}
+		api->godot_variant_destroy(&var_move);
+		api->godot_pool_int_array_destroy(&move);
 		count++;
 	}
 	user_data->boardcopy->num_moves = count;

@@ -54,6 +54,12 @@ if (0 <= new_x && new_x <= 7 && 0 <= new_y  && new_y <= 7){ \
 ((0 <= x && x < 8) && (0 <= y && y < 8))
 
 
+void delete_boardcopy(Board *board){
+  free(board->white);
+  free(board->black);
+  free(board);
+}
+
 void new_board(Board *board){
 
 
@@ -157,7 +163,9 @@ int check_setup(Board *board, Piece *piece, int x, int y, int attx, int atty){
 
   move_piece(copy, piece->color, piece->x, piece->y, x, y);
 
-  return check_check(copy, color);
+  int ret =  check_check(copy, color);
+  delete_boardcopy(copy);
+  return ret;
 }
 
 int add_pawn_moves(Board *board, Piece *piece, int index){
@@ -361,14 +369,15 @@ void proccess_moves(Board *board, enum Player player){
     }
   }
   board->moves[index][0] = -1;
+  board->num_moves = index;
 }
 
 void print_moves(Board *board){
   int i = 0;
-  printf("moves:\n");
+  //printf("moves:\n");
   while (board->moves[i][0] != -1){
-    printf("%d,%d -> %d, %d\n", board->moves[i][0], board->moves[i][1],
-      board->moves[i][2], board->moves[i][3]);
+    //printf("%d,%d -> %d, %d\n", board->moves[i][0], board->moves[i][1],
+      // board->moves[i][2], board->moves[i][3]);
     i++;
   }
 }
@@ -505,7 +514,7 @@ int check_check(Board *board, enum Player color){
     int new_x = x+knight_moves[i][0], new_y = y+knight_moves[i][1];
     if (check_valid_pos(new_x, new_y)){
       if (board->grid[new_x][new_y].piecetype == KNIGHT && board->grid[new_x][new_y].color == enemy){
-        printf("KNIGHT CHECK\n");
+        //printf("KNIGHT CHECK\n");
         return 1;
       }
     }
@@ -517,14 +526,14 @@ int check_check(Board *board, enum Player color){
     new_x = x+1, new_y = y-1;
     if (check_valid_pos(new_x, new_y)){
       if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
-        printf("PAWN CHECK\n");
+        //printf("PAWN CHECK\n");
         return 1;
       }
     }
     new_x = x-1, new_y = y-1;
     if (check_valid_pos(new_x, new_y)){
       if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
-        printf("PAWN CHECK\n");
+        //printf("PAWN CHECK\n");
         return 1;
       }
     }
@@ -533,14 +542,14 @@ int check_check(Board *board, enum Player color){
     new_x = x+1, new_y = y+1;
     if (check_valid_pos(new_x, new_y)){
       if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
-        printf("PAWN CHECK\n");
+        //printf("PAWN CHECK\n");
         return 1;
       }
     }
     new_x = x-1, new_y = y+1;
     if (check_valid_pos(new_x, new_y)){
       if (board->grid[new_x][new_y].piecetype == PAWN && board->grid[new_x][new_y].color == enemy){
-        printf("PAWN CHECK\n");
+        //printf("PAWN CHECK\n");
         return 1;
       }
     }
@@ -559,7 +568,7 @@ int check_check(Board *board, enum Player color){
       new_x = new_x+rook_moves[i][0], new_y = new_y+rook_moves[i][1];
       if (check_valid_pos(new_x, new_y)){
         if ((board->grid[new_x][new_y].piecetype == ROOK || board->grid[new_x][new_y].piecetype == QUEEN) && board->grid[new_x][new_y].color == enemy){
-          printf("ROOK CHECK %d\n", enemy);
+          //printf("ROOK CHECK %d\n", enemy);
           return 1;
         } else if (board->grid[new_x][new_y].piecetype != NONE ){
           break;
@@ -576,13 +585,19 @@ int check_check(Board *board, enum Player color){
     {-1,1},
     {-1,-1}
   };
+  int new_x, new_y;
   for (int i=0; i<8; i++){
-    int new_x =x, new_y = y;
+    new_x = x;
+    new_y = y;
     for (int j=0; check_valid_pos(new_x, new_y); j++){
-      new_x = new_x+bishop_moves[i][0], new_y = new_y+bishop_moves[i][1];
+      new_x = new_x+bishop_moves[i][0];
+      new_y = new_y+bishop_moves[i][1];
+      if (x ==9){//for some reason, it bugs unless x is printed...
+        printf("%d\n", x);
+      }
       if (check_valid_pos(new_x, new_y)){
         if ((board->grid[new_x][new_y].piecetype == BISHOP || board->grid[new_x][new_y].piecetype == QUEEN) && board->grid[new_x][new_y].color == enemy){
-          printf("BISHOP CHECK %d\n", enemy);
+          printf("BISHOP CHECK %d %d / %d %d: %d\n", x, y, new_x, new_y, board->grid[new_x][new_y].piecetype);
           return 1;
         } else if (board->grid[new_x][new_y].piecetype != NONE ){
           break;
@@ -607,7 +622,7 @@ int check_check(Board *board, enum Player color){
     int new_x = x+king_moves[i][0], new_y = y+king_moves[i][1];
     if (check_valid_pos(new_x, new_y)){
       if (board->grid[new_x][new_y].piecetype == KING && board->grid[new_x][new_y].color == enemy){
-        printf("KNIGHT CHECK\n");
+        //printf("KNIGHT CHECK\n");
         return 1;
       }
     }

@@ -16,7 +16,7 @@ int force_move_piece(Board *board, enum Player player, int x, int y, int new_x, 
 int check_check(Board *board, enum Player color);
 int check_mate(Board *board, enum Player color);
 
-
+void delete_boardcopy(Board *board);
 Board *copy_board(Board *board);
 
 
