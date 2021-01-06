@@ -1,4 +1,7 @@
-make: engine.o engine_interface.o ai.o ai_interface.o
+make: libai libengine
+	
+
+libengine: engine.o engine_interface.o ai.o ai_interface.o
 	gcc -rdynamic -shared engine_interface.o engine.o -o ../bin/libengine.so
 
 libai:  engine.o ai.o ai_interface.o

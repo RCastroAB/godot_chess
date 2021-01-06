@@ -192,7 +192,6 @@ godot_variant godot_set_moves(godot_object *p_instance, void *p_method_data,
 			user_data->boardcopy->moves[count][i] = api->godot_pool_int_array_get(&move, i);
 		}
 		count++;
-		printf("%d ", count);
 	}
 	user_data->boardcopy->num_moves = count;
 
@@ -203,8 +202,8 @@ godot_variant godot_get_move(godot_object *p_instance, void *p_method_data,
 	void *p_user_data, int p_num_args, godot_variant **p_args){
 	user_data_struct *user_data = (user_data_struct *) p_user_data;
 
-	int r = rand();
-	r = r % user_data->boardcopy->num_moves;
+	int r = get_move(user_data->boardcopy, user_data->color);
+
 	int *move = user_data->boardcopy->moves[r];
 	godot_pool_int_array move_array;
 	api->godot_pool_int_array_new(&move_array);

@@ -489,7 +489,6 @@ int check_check(Board *board, enum Player color){
 
   int x = king->x;
   int y = king->y;
-  printf("%d, %d\n", x, y);
 
   //CHECK KNIGHTS
   int knight_moves[8][2] = {
@@ -594,7 +593,25 @@ int check_check(Board *board, enum Player color){
     }
   }
 
-
+  int king_moves[8][2] = {
+    {0,1},
+    {0,-1},
+    {1,0},
+    {-1,0},
+    {-1,-1},
+    {-1,1},
+    {1,1},
+    {1,-1},
+  };
+  for (int i=0; i<8; i++){
+    int new_x = x+king_moves[i][0], new_y = y+king_moves[i][1];
+    if (check_valid_pos(new_x, new_y)){
+      if (board->grid[new_x][new_y].piecetype == KING && board->grid[new_x][new_y].color == enemy){
+        printf("KNIGHT CHECK\n");
+        return 1;
+      }
+    }
+  }
 
   return 0;
 }

@@ -1,31 +1,4 @@
-
-enum PieceType {NONE=0, PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING};
-enum Player {EMPTY, WHITE, BLACK};
-
-typedef struct piece {
-  int x;
-  int y;
-  enum PieceType piecetype;
-  enum Player color;
-  int id;
-} Piece;
-
-typedef struct player {
-  int piece_count;
-  int checked;
-  Piece *pieces[16];
-  Piece *king;
-} Player;
-
-
-typedef struct board {
-  Player *white;
-  Player *black;
-  Piece grid[8][8];
-  int moves[150][6];
-  int num_moves;
-} Board;
-
+#include "common.h"
 
 void new_board(Board *board);
 
@@ -42,3 +15,9 @@ int force_move_piece(Board *board, enum Player player, int x, int y, int new_x, 
 
 int check_check(Board *board, enum Player color);
 int check_mate(Board *board, enum Player color);
+
+
+Board *copy_board(Board *board);
+
+
+Player *get_player(Board *board, enum Player player);
