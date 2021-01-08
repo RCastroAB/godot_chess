@@ -4,7 +4,7 @@ signal select_piece(piece_pos)
 signal move_piece(piece_pos)
 
 var playing = false
-
+var color
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
@@ -29,3 +29,6 @@ func _ready():
 
 func _on_move_piece(pos, newpos, attpos, color):
 	pass
+
+func set_color(color):
+	color = color

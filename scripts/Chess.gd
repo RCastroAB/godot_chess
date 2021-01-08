@@ -4,9 +4,9 @@ extends Node2D
 # and connecting to the engine
 
 
-var current_player = 1
+onready var current_player = 1
 var current_moves = [PoolIntArray()]
-var num_players = 2
+var num_players = 0
 signal new_board(board)
 
 signal moves_processed(moves)
@@ -27,9 +27,18 @@ func _ready():
 	elif num_players == 2:
 		players.append(load('res://scenes/Player.tscn').instance())
 		players.append(load('res://scenes/Player.tscn').instance())
+	else:
+		players.append(load('res://scenes/AI.tscn').instance())
+		players.append(load('res://scenes/AI.tscn').instance())
+		connect("moves_processed", players[0], '_on_moves_processed')
+		$PieceMap.connect('move_piece', players[0], '_on_move_piece')
+		connect("moves_processed", players[1], '_on_moves_processed')
+		$PieceMap.connect('move_piece', players[1], '_on_move_piece')
+	
 	add_child(players[0])
 	add_child(players[1])
-	
+	players[0].set_color(1)
+	players[1].set_color(2)
 	
 	connect("moves_processed", $PieceMap, '_on_moves_processed')
 	
@@ -37,7 +46,6 @@ func _ready():
 	$PieceMap.connect('move_piece', self, '_on_move_piece')
 	
 	connect("new_board", $PieceMap, '_on_new_board')
-	
 	call_deferred('turn')
 
 
@@ -56,8 +64,21 @@ func turn():
 		$Win/Label.text = "Player " + str(other_player()) + " Wins!"
 		$Win.visible = true
 		return
+	print('its breaking here')
 	current_moves = get_all_moves(current_player)
-	
+	print(current_moves)
+	print('it broke there')
+	if current_moves == []:
+		$Win/Label.text = "DRAW"
+		$Win.visible = true
+		return
+	var t = Timer.new()
+	t.set_wait_time(0.5)
+	t.set_one_shot(true)
+	self.add_child(t)
+	t.start()
+	yield(t, "timeout")
+
 	emit_signal("moves_processed", current_moves)
 	
 	

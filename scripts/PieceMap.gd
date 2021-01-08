@@ -6,7 +6,7 @@ var Piece = load('res://scenes/Piece.tscn')
 
 signal move_piece(old_pos, new_pos, att_pos, color)
 
-const player_num =2
+const player_num =0
 const test_num = 0
 
 var winner

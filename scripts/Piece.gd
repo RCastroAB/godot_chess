@@ -6,12 +6,12 @@ var type
 var id
 var target = position
 var moving = false
+var direction
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
 export var grid_position = Vector2()
 var player
-
 const SPRITES = 'res://sprites/'
 
 var moved = false
@@ -43,8 +43,9 @@ func create_piece(piecename, color):
 		
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	if target != position:
+	if target != position and not moving:
 		moving = true
+		direction = (target - position)
 	if moving == true:
 		if (target - position).length() <= tolerance:
 			position = target
@@ -52,5 +53,5 @@ func _process(delta):
 			$Knock.play()
 			moving = false
 		else:
-			position += (target-position).normalized() * speed *delta
+			position += direction * speed *delta
 

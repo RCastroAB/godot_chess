@@ -25,6 +25,7 @@ godot_variant godot_init_board(godot_object *p_instance, void *p_method_data, vo
 godot_variant godot_print_board(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_move_oponent(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_set_moves(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
+godot_variant godot_set_color(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 godot_variant godot_get_move(godot_object *p_instance, void *p_method_data, void *p_user_data, int p_num_args, godot_variant **p_args);
 
 // `gdnative_init` is a function that initializes our dynamic library.
@@ -108,6 +109,10 @@ void GDN_EXPORT godot_nativescript_init(void *p_handle) {
 	method_get_move.method = &godot_get_move;
 	nativescript_api->godot_nativescript_register_method(p_handle, "AI", "get_move", attributes, method_get_move);
 
+	godot_instance_method method_set_color = { NULL, NULL, NULL };
+	method_set_color.method = &godot_set_color;
+	nativescript_api->godot_nativescript_register_method(p_handle, "AI", "set_color", attributes, method_set_color);
+
 }
 
 // In our constructor, allocate memory for our structure and fill
@@ -174,7 +179,9 @@ godot_variant godot_move_oponent(godot_object *p_instance, void *p_method_data,
 	atty = api->godot_variant_as_int(p_args[5]);
 
 	enum Player oponent = user_data->color == WHITE ? BLACK : WHITE;
+	printf("moving piececount: %d\n", get_player(user_data->boardcopy, user_data->color)->piece_count);
 	force_move_piece(user_data->boardcopy, oponent, x, y, new_x, new_y, attx, atty);
+	printf("after moving piececount: %d\n", get_player(user_data->boardcopy, user_data->color)->piece_count);
 }
 
 
@@ -200,11 +207,29 @@ godot_variant godot_set_moves(godot_object *p_instance, void *p_method_data,
 }
 
 
-godot_variant godot_get_move(godot_object *p_instance, void *p_method_data,
+
+godot_variant godot_set_color(godot_object *p_instance, void *p_method_data,
 	void *p_user_data, int p_num_args, godot_variant **p_args){
 	user_data_struct *user_data = (user_data_struct *) p_user_data;
 
-	int r = get_move(user_data->boardcopy, user_data->color);
+	user_data->color = api->godot_variant_as_int(p_args[0]);
+
+}
+
+
+
+godot_variant godot_get_move(godot_object *p_instance, void *p_method_data,
+	void *p_user_data, int p_num_args, godot_variant **p_args){
+	user_data_struct *user_data = (user_data_struct *) p_user_data;
+	int depth = api->godot_variant_as_int(p_args[0]);
+	printf("color: %d, blacks: %d, whites: %d\n", user_data->color, user_data->boardcopy->black->piece_count, user_data->boardcopy->white->piece_count);
+	for (int i=0; i<8; i++){
+		for (int j=0; j<8; j++){
+			printf("%d ", user_data->boardcopy->grid[j][i].piecetype);
+		}
+		printf("\n");
+	}
+	int r = get_move(user_data->boardcopy, user_data->color, depth);
 
 	int *move = user_data->boardcopy->moves[r];
 	godot_pool_int_array move_array;

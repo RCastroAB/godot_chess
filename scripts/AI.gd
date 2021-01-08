@@ -11,15 +11,18 @@ func _ready():
 	ai.init_board()
 
 func _on_move_piece(pos, new_pos, att_pos, color):
-	print('called')
+	if color == self.color:
+		return
 	ai.move_oponent(pos.x, pos.y, new_pos.x, new_pos.y,
 		att_pos.x, att_pos.y)
-	ai.print_board()
+#	ai.print_board()
 	
 
 func _on_moves_processed(moves):
+	if not playing:
+		return
 	ai.set_moves(moves)
-	var move = ai.get_move()
+	var move = ai.get_move(0)
 	var pos = Vector2(move[0], move[1])
 	select_piece(pos)
 	var movepos = Vector2(move[2], move[3])
@@ -27,3 +30,7 @@ func _on_moves_processed(moves):
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
+
+func set_color(color):
+	ai.set_color(color)
+	self.color = color

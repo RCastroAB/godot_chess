@@ -11,6 +11,7 @@ typedef struct piece {
   enum PieceType piecetype;
   enum Player color;
   int id;
+  int moved;
 } Piece;
 
 typedef struct player {

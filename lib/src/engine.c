@@ -374,16 +374,17 @@ void proccess_moves(Board *board, enum Player player){
 
 void print_moves(Board *board){
   int i = 0;
-  //printf("moves:\n");
+  printf("moves:\n");
   while (board->moves[i][0] != -1){
-    //printf("%d,%d -> %d, %d\n", board->moves[i][0], board->moves[i][1],
-      // board->moves[i][2], board->moves[i][3]);
+    printf("%d,%d -> %d, %d\n", board->moves[i][0], board->moves[i][1],
+      board->moves[i][2], board->moves[i][3]);
     i++;
   }
 }
 
 
 void attack_piece(Board *board, enum Player player, int attx, int atty){
+  // printf("attacking: %d %d\n", attx, atty);
   board->grid[attx][atty].piecetype = NONE;
   board->grid[attx][atty].color = EMPTY;
   enum Player enemy = player == WHITE ? BLACK : WHITE;
@@ -391,6 +392,7 @@ void attack_piece(Board *board, enum Player player, int attx, int atty){
   if (enemy == WHITE){
     // find piece to remove
     int i, found =0;
+    // printf("white piececount: %d\n",board->white->piece_count);
     for (i=0; i < board->white->piece_count; i++){
       if (board->white->pieces[i]->x == attx && board->white->pieces[i]->y == atty){
         found = 1;
@@ -399,21 +401,23 @@ void attack_piece(Board *board, enum Player player, int attx, int atty){
     }
     if (!found)
       return;
+    printf("found: %d, attack: %d %d, piece: %d\n", found, attx, atty, board->grid[attx][atty].piecetype);
     for(i=i+1; i < board->white->piece_count; i++){
       board->white->pieces[i-1] = board->white->pieces[i];
     }
     board->white->piece_count--;
   } else {
     int i, found=0;
+    // printf("black piececount: %d\n",board->black->piece_count);
     for (i=0; i < board->black->piece_count; i++){
       if (board->black->pieces[i]->x == attx && board->black->pieces[i]->y == atty){
         found = 1;
-
         break;
       }
     }
     if (!found)
       return;
+    printf("found: %d, attack: %d %d, piece: %d\n", found, attx, atty, board->grid[attx][atty].piecetype);
     for(i=i+1; i < board->black->piece_count; i++){
       board->black->pieces[i-1] = board->black->pieces[i];
     }
@@ -488,13 +492,19 @@ int check_check(Board *board, enum Player color){
     enemy = WHITE;
     player = board->black;
   }
-  Piece *king;
+  Piece *king = NULL;
   for (int i=0; i<player->piece_count; i++){
     if (player->pieces[i]->piecetype == KING){
       king = player->pieces[i];
       break;
     }
   }
+  // for (int i =0; i < 8; i++){
+  //   for (int j=0; j <8; j++){
+  //     printf("%d ", board->grid[j][i].piecetype);
+  //   }
+  //   printf("\n");
+  // }
 
   int x = king->x;
   int y = king->y;
