@@ -1,7 +1,7 @@
 extends Node2D
 
-export var speed = 1000
-export var tolerance = 20
+export var speed = 4
+export var tolerance = 16
 var type
 var id
 var target = position

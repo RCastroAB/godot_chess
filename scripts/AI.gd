@@ -22,7 +22,7 @@ func _on_moves_processed(moves):
 	if not playing:
 		return
 	ai.set_moves(moves)
-	var move = ai.get_move(0)
+	var move = ai.get_move(2)
 	var pos = Vector2(move[0], move[1])
 	select_piece(pos)
 	var movepos = Vector2(move[2], move[3])
