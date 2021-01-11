@@ -401,7 +401,7 @@ void attack_piece(Board *board, enum Player player, int attx, int atty){
     }
     if (!found)
       return;
-    printf("found: %d, attack: %d %d, piece: %d\n", found, attx, atty, board->grid[attx][atty].piecetype);
+    // printf("found: %d, attack: %d %d, piece: %d\n", found, attx, atty, board->grid[attx][atty].piecetype);
     for(i=i+1; i < board->white->piece_count; i++){
       board->white->pieces[i-1] = board->white->pieces[i];
     }
@@ -417,7 +417,7 @@ void attack_piece(Board *board, enum Player player, int attx, int atty){
     }
     if (!found)
       return;
-    printf("found: %d, attack: %d %d, piece: %d\n", found, attx, atty, board->grid[attx][atty].piecetype);
+    // printf("found: %d, attack: %d %d, piece: %d\n", found, attx, atty, board->grid[attx][atty].piecetype);
     for(i=i+1; i < board->black->piece_count; i++){
       board->black->pieces[i-1] = board->black->pieces[i];
     }
@@ -607,7 +607,7 @@ int check_check(Board *board, enum Player color){
       }
       if (check_valid_pos(new_x, new_y)){
         if ((board->grid[new_x][new_y].piecetype == BISHOP || board->grid[new_x][new_y].piecetype == QUEEN) && board->grid[new_x][new_y].color == enemy){
-          printf("BISHOP CHECK %d %d / %d %d: %d\n", x, y, new_x, new_y, board->grid[new_x][new_y].piecetype);
+          // printf("BISHOP CHECK %d %d / %d %d: %d\n", x, y, new_x, new_y, board->grid[new_x][new_y].piecetype);
           return 1;
         } else if (board->grid[new_x][new_y].piecetype != NONE ){
           break;

@@ -4,7 +4,7 @@ extends Node2D
 # and connecting to the engine
 
 
-onready var current_player = 1
+var current_player
 var current_moves = [PoolIntArray()]
 var num_players = 0
 signal new_board(board)
@@ -13,40 +13,92 @@ signal moves_processed(moves)
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
-onready var engine = preload('res://lib/bin/libengine.gdns')
-
+onready var engineloader = preload('res://lib/bin/libengine.gdns')
+var engine
 var players = []
 
-func _ready():
-	engine = engine.new()
-	if num_players == 1:
-		players.append(load('res://scenes/Player.tscn').instance())
-		players.append(load('res://scenes/AI.tscn').instance())
-		connect("moves_processed", players[1], '_on_moves_processed')
-		$PieceMap.connect('move_piece', players[1], '_on_move_piece')
-	elif num_players == 2:
-		players.append(load('res://scenes/Player.tscn').instance())
-		players.append(load('res://scenes/Player.tscn').instance())
-	else:
-		players.append(load('res://scenes/AI.tscn').instance())
-		players.append(load('res://scenes/AI.tscn').instance())
-		connect("moves_processed", players[0], '_on_moves_processed')
-		$PieceMap.connect('move_piece', players[0], '_on_move_piece')
-		connect("moves_processed", players[1], '_on_moves_processed')
-		$PieceMap.connect('move_piece', players[1], '_on_move_piece')
+
+func delete_old_players():
+	for child in players:
+		if is_connected("moves_processed", child, '_on_moves_processed'):
+			disconnect("moves_processed", child, '_on_moves_processed')
+		if $PieceMap.is_connected("move_piece", child, '_on_move_piece'):
+			$PieceMap.disconnect("move_piece", child, '_on_move_piece')
+		remove_child(child)
+		child.queue_free()
+	players = []
 	
+	engine = load('res://lib/bin/libengine.gdns').new()
+	
+	
+	
+	
+
+func players_ready():
 	add_child(players[0])
 	add_child(players[1])
 	players[0].set_color(1)
 	players[1].set_color(2)
+
+	$PieceMap.set_board(engine.get_board())
+	current_player = 1
 	
+	call_deferred('turn')
+
+func _on_0player_pressed():
+	_on_2player_pressed()
+	
+	var t = Timer.new()
+	t.set_wait_time(0.5)
+	t.set_one_shot(true)
+	self.add_child(t)
+	t.start()
+	yield(t, "timeout")
+	
+	
+	
+	delete_old_players()
+	
+	players.append(load('res://scenes/AI.tscn').instance())
+	players.append(load('res://scenes/AI.tscn').instance())
+	connect("moves_processed", players[0], '_on_moves_processed')
+	$PieceMap.connect('move_piece', players[0], '_on_move_piece')
+	connect("moves_processed", players[1], '_on_moves_processed')
+	$PieceMap.connect('move_piece', players[1], '_on_move_piece')
+	
+	players_ready()
+	
+
+func _on_1player_pressed():
+	delete_old_players()
+	
+	players.append(load('res://scenes/Player.tscn').instance())
+	players.append(load('res://scenes/AI.tscn').instance())
+	connect("moves_processed", players[1], '_on_moves_processed')
+	$PieceMap.connect('move_piece', players[1], '_on_move_piece')
+	
+	
+	players_ready()
+
+func _on_2player_pressed():
+	delete_old_players()
+	
+	players.append(load('res://scenes/Player.tscn').instance())
+	players.append(load('res://scenes/Player.tscn').instance())
+	
+	
+	players_ready()
+
+
+
+func _ready():
+	
+
 	connect("moves_processed", $PieceMap, '_on_moves_processed')
 	
-	$PieceMap.set_board(engine.get_board())
 	$PieceMap.connect('move_piece', self, '_on_move_piece')
 	
 	connect("new_board", $PieceMap, '_on_new_board')
-	call_deferred('turn')
 
 
 func emit_from_agent(pos):
@@ -64,10 +116,9 @@ func turn():
 		$Win/Label.text = "Player " + str(other_player()) + " Wins!"
 		$Win.visible = true
 		return
-	print('its breaking here')
 	current_moves = get_all_moves(current_player)
 	print(current_moves)
-	print('it broke there')
+#	print('it broke there')
 	if current_moves == []:
 		$Win/Label.text = "DRAW"
 		$Win.visible = true

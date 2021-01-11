@@ -12,8 +12,8 @@ const test_num = 0
 var winner
 
 var board 
-export var speed = 2.0
-export var tolerance = 5.0
+export var speed = 1.0
+export var tolerance = 8.0
 
 var position_pieces = {}
 var pieces = {}
@@ -140,6 +140,8 @@ func clear_overlay(pos):
 
 
 func set_board(board):
+	for child in get_children():
+		remove_child(child)
 	var piecenames = {
 		1: 'pawn',
 		2: 'rook',
