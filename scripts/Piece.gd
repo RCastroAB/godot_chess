@@ -1,6 +1,6 @@
 extends Node2D
 
-export var speed = 4
+export var speed = 3
 export var tolerance = 32
 var type
 var id
@@ -37,7 +37,7 @@ func create_piece(piecename, color):
 		'pawn':
 			$Sprite.texture = load(SPRITES +path+'WIP_pawn.png')
 		'bishop':
-			$Sprite.texture = load(SPRITES +path+'WIP_pawn.png')
+			$Sprite.texture = load(SPRITES +path+'bishop.png')
 		'rook':
 			$Sprite.texture = load(SPRITES + path + 'WIP_rook.png')
 		

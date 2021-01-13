@@ -61,37 +61,37 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI"]
+[node name="Wins" type="VBoxContainer" parent="UI"]
 margin_right = 224.0
 margin_bottom = 32.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/VBoxContainer"]
+[node name="White" type="HBoxContainer" parent="UI/Wins"]
 margin_right = 224.0
 margin_bottom = 14.0
 
-[node name="Label" type="Label" parent="UI/VBoxContainer/HBoxContainer"]
+[node name="Text" type="Label" parent="UI/Wins/White"]
 margin_right = 89.0
 margin_bottom = 14.0
 text = "WHITE WINS: "
 
-[node name="Label2" type="Label" parent="UI/VBoxContainer/HBoxContainer"]
+[node name="WinCount" type="Label" parent="UI/Wins/White"]
 margin_left = 93.0
 margin_right = 101.0
 margin_bottom = 14.0
 text = "0"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="UI/VBoxContainer"]
+[node name="Black" type="HBoxContainer" parent="UI/Wins"]
 margin_top = 18.0
 margin_right = 224.0
 margin_bottom = 32.0
 custom_constants/separation = 0
 
-[node name="Label" type="Label" parent="UI/VBoxContainer/HBoxContainer2"]
+[node name="Text" type="Label" parent="UI/Wins/Black"]
 margin_right = 88.0
 margin_bottom = 14.0
 text = "BLACK WINS: "
 
-[node name="Label2" type="Label" parent="UI/VBoxContainer/HBoxContainer2"]
+[node name="WinCount" type="Label" parent="UI/Wins/Black"]
 margin_left = 88.0
 margin_right = 96.0
 margin_bottom = 14.0

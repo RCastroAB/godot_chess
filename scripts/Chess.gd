@@ -2,13 +2,13 @@ extends Node2D
 
 # Role: In charge of running the chess logic
 # and connecting to the engine
-
+var number_to_color = {1: 'White', 2: 'Black'}
 
 var current_player
 var current_moves = [PoolIntArray()]
 var num_players = 0
 signal new_board(board)
-
+signal win(color)
 signal moves_processed(moves)
 # Declare member variables here. Examples:
 # var a = 2
@@ -29,7 +29,7 @@ func delete_old_players():
 	players = []
 	
 	engine = load('res://lib/bin/libengine.gdns').new()
-	
+	$Win.visible = false
 	
 	
 	
@@ -113,8 +113,9 @@ func turn():
 	var checkmate = engine.get_checkmate(current_player)
 	print('checkmate: ', checkmate)
 	if checkmate:
-		$Win/Label.text = "Player " + str(other_player()) + " Wins!"
+		$Win/Label.text = number_to_color[other_player()] + " Wins!"
 		$Win.visible = true
+		emit_signal('win', number_to_color[other_player()])
 		return
 	current_moves = get_all_moves(current_player)
 	print(current_moves)
