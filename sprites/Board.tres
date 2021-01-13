@@ -1,10 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_resource type="TileSet" load_steps=2 format=2]
 
-[ext_resource path="res://tiles.png" type="Texture" id=1]
-[ext_resource path="res://PieceMap.gd" type="Script" id=2]
-[ext_resource path="res://audio/tap_piece.wav" type="AudioStream" id=3]
+[ext_resource path="res://sprites/tiles.png" type="Texture" id=1]
 
-[sub_resource type="TileSet" id=1]
+[resource]
 0/name = "tiles.png 0"
 0/texture = ExtResource( 1 )
 0/tex_offset = Vector2( 0, 0 )
@@ -75,14 +73,3 @@
 4/shape_one_way_margin = 0.0
 4/shapes = [  ]
 4/z_index = 0
-
-[node name="PieceMap" type="TileMap"]
-tile_set = SubResource( 1 )
-format = 1
-tile_data = PoolIntArray( 0, 4, 0, 1, 4, 0, 2, 4, 0, 3, 4, 0, 4, 4, 0, 5, 4, 0, 6, 4, 0, 7, 4, 0, 65536, 4, 0, 65537, 4, 0, 65538, 4, 0, 65539, 4, 0, 65540, 4, 0, 65541, 4, 0, 65542, 4, 0, 65543, 4, 0, 131072, 4, 0, 131073, 4, 0, 131074, 4, 0, 131075, 4, 0, 131076, 4, 0, 131077, 4, 0, 131078, 4, 0, 131079, 4, 0, 196608, 4, 0, 196609, 4, 0, 196610, 4, 0, 196611, 4, 0, 196612, 4, 0, 196613, 4, 0, 196614, 4, 0, 196615, 4, 0, 262144, 4, 0, 262145, 4, 0, 262146, 4, 0, 262147, 4, 0, 262148, 4, 0, 262149, 4, 0, 262150, 4, 0, 262151, 4, 0, 327680, 4, 0, 327681, 4, 0, 327682, 4, 0, 327683, 4, 0, 327684, 4, 0, 327685, 4, 0, 327686, 4, 0, 327687, 4, 0, 393216, 4, 0, 393217, 4, 0, 393218, 4, 0, 393219, 4, 0, 393220, 4, 0, 393221, 4, 0, 393222, 4, 0, 393223, 4, 0, 458752, 4, 0, 458753, 4, 0, 458754, 4, 0, 458755, 4, 0, 458756, 4, 0, 458757, 4, 0, 458758, 4, 0, 458759, 4, 0 )
-script = ExtResource( 2 )
-speed = 0.2
-
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
-pause_mode = 1
-stream = ExtResource( 3 )

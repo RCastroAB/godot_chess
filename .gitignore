@@ -8,3 +8,4 @@ lib/bin/*
 **/*.o
 **/*.h.ghc
 *.ghc
+*.log

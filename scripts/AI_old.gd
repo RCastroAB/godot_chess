@@ -1,4 +1,6 @@
 extends Node
+# Role: communicating with gdnative ai
+
 
 var board
 signal movement_choice(piece, position)
