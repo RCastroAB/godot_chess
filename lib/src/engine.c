@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 #define set_move_noattack(board, x, y, new_x, new_y, index) \
 if (0 <= new_x && new_x <= 7 && 0 <= new_y  && new_y <= 7){ \
@@ -85,16 +86,18 @@ void new_board(Board *board){
 
 
 void fill_board(Board *board){
-  enum PieceType preset[] = {ROOK, KNIGHT, BISHOP, KING, QUEEN, BISHOP, KNIGHT, ROOK};
+  enum PieceType preset[] = {ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK};
   int id = 1;
   for (int i=0; i <8; i++){
     board->grid[i][1].piecetype = PAWN;
     board->grid[i][1].color = BLACK;
+    board->grid[i][1].moved = 0;
     board->grid[i][1].id = id++;
     board->black->pieces[i] = &(board->grid[i][1]);
 
     board->grid[i][6].piecetype = PAWN;
     board->grid[i][6].color = WHITE;
+    board->grid[i][6].moved = 0;
     board->grid[i][6].id = id++;
     board->white->pieces[i] = &(board->grid[i][6]);
   }
@@ -103,12 +106,14 @@ void fill_board(Board *board){
   for (int i=0; i<8; i++){
     board->grid[i][0].piecetype = preset[i];
     board->grid[i][0].color = BLACK;
+    board->grid[i][0].moved = 0;
     board->grid[i][0].id = id++;
     board->black->pieces[8+i] = &(board->grid[i][0]);
 
 
     board->grid[i][7].piecetype = preset[i];
     board->grid[i][7].color = WHITE;
+    board->grid[i][7].moved = 0;
     board->grid[i][7].id = id++;
     board->white->pieces[8+i] = &(board->grid[i][7]);
   }
@@ -293,6 +298,20 @@ int add_king_moves(Board *board, Piece *piece, int index){
       set_move_moveattack(board, x, y, new_x, new_y, index, color);
     }
   }
+  if (piece->moved == 0){
+    if (board->grid[x+1][y].piecetype == NONE && !check_setup(board, piece, x+1, y, -1, -1)){
+      if (board->grid[7][y].piecetype == ROOK && board->grid[7][y].color == color && board->grid[7][y].moved == 0){
+        set_move_noattack(board, x, y, x+2, y, index);
+      }
+    }
+    if (board->grid[x-1][y].piecetype == NONE && !check_setup(board, piece, x-1, y, -1, -1)){
+      if (board->grid[x-3][y].piecetype == NONE){
+        if (board->grid[7][y].piecetype == ROOK && board->grid[0][y].color == color && board->grid[0][y].moved == 0){
+          set_move_noattack(board, x, y, x-2, y, index);
+        }
+      }
+    }
+  }
   return index;
 }
 
@@ -442,23 +461,8 @@ int move_piece(Board *board, enum Player player, int x, int y, int new_x, int ne
       break;
     }
   }
-  if (board->moves[i][4] != -1){
-    attack_piece(board, player, board->moves[i][4], board->moves[i][5]);
-  }
-  board->grid[new_x][new_y] = board->grid[x][y];
-  board->grid[new_x][new_y].x = new_x;
-  board->grid[new_x][new_y].y = new_y;
-  board->grid[x][y].piecetype = NONE;
-  board->grid[x][y].color = EMPTY;
-  Player *p = get_player(board, player);
-  for (i=0; i<p->piece_count; i++){
-    if (p->pieces[i]->x == x && p->pieces[i]->y == y){
-      p->pieces[i] = &(board->grid[new_x][new_y]);
-      break;
-    }
-  }
 
-  return 1;
+  return force_move_piece(board, player, x, y, new_x, new_y, board->moves[i][4], board->moves[i][5]);
 }
 
 int force_move_piece(Board *board, enum Player player, int x, int y, int new_x, int new_y, int attx, int atty ){
@@ -475,6 +479,14 @@ int force_move_piece(Board *board, enum Player player, int x, int y, int new_x, 
     if (p->pieces[i]->x == x && p->pieces[i]->y == y){
       p->pieces[i] = &(board->grid[new_x][new_y]);
       break;
+    }
+  }
+  if (board->grid[new_x][new_y].piecetype == KING){
+    if (new_x - x == 2){
+      force_move_piece(board, player, 7, y, 5, y, -1, -1);
+    }
+    if (new_x - x == -2){
+      force_move_piece(board, player, 0, y, 3, y, -1, -1);
     }
   }
 
@@ -572,7 +584,7 @@ int check_check(Board *board, enum Player color){
     {-1,0},
     {0,-1}
   };
-  for (int i=0; i<8; i++){
+  for (int i=0; i<4; i++){
     int new_x =x, new_y = y;
     for (int j=0; check_valid_pos(new_x, new_y); j++){
       new_x = new_x+rook_moves[i][0], new_y = new_y+rook_moves[i][1];
@@ -596,15 +608,12 @@ int check_check(Board *board, enum Player color){
     {-1,-1}
   };
   int new_x, new_y;
-  for (int i=0; i<8; i++){
+  for (int i=0; i<4; i++){
     new_x = x;
     new_y = y;
     for (int j=0; check_valid_pos(new_x, new_y); j++){
       new_x = new_x+bishop_moves[i][0];
       new_y = new_y+bishop_moves[i][1];
-      if (x ==9){//for some reason, it bugs unless x is printed...
-        printf("%d\n", x);
-      }
       if (check_valid_pos(new_x, new_y)){
         if ((board->grid[new_x][new_y].piecetype == BISHOP || board->grid[new_x][new_y].piecetype == QUEEN) && board->grid[new_x][new_y].color == enemy){
           // printf("BISHOP CHECK %d %d / %d %d: %d\n", x, y, new_x, new_y, board->grid[new_x][new_y].piecetype);
