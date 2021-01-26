@@ -9,3 +9,4 @@ lib/bin/*
 **/*.h.ghc
 *.ghc
 *.log
+*.bc

@@ -29,9 +29,6 @@ func _on_moves_processed(moves):
 	select_piece(pos)
 	var movepos = Vector2(move[2], move[3])
 	move_piece(movepos)
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
 
 func set_color(color):
 	ai.set_color(color)

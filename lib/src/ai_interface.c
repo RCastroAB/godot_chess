@@ -152,7 +152,9 @@ godot_variant godot_init_board(godot_object *p_instance, void *p_method_data,
 	user_data_struct *user_data = (user_data_struct *) p_user_data;
 	new_board(user_data->boardcopy);
 	fill_board(user_data->boardcopy);
-
+	godot_variant ret;
+	api->godot_variant_new_int(&ret, 1);
+	return ret;
 }
 
 godot_variant godot_print_board(godot_object *p_instance, void *p_method_data,
@@ -164,6 +166,9 @@ godot_variant godot_print_board(godot_object *p_instance, void *p_method_data,
 		}
 		printf("\n");
 	}
+	godot_variant ret;
+	api->godot_variant_new_int(&ret, 1);
+	return ret;
 }
 
 
@@ -182,6 +187,9 @@ godot_variant godot_move_oponent(godot_object *p_instance, void *p_method_data,
 	printf("moving piececount: %d\n", get_player(user_data->boardcopy, user_data->color)->piece_count);
 	force_move_piece(user_data->boardcopy, oponent, x, y, new_x, new_y, attx, atty);
 	printf("after moving piececount: %d\n", get_player(user_data->boardcopy, user_data->color)->piece_count);
+	godot_variant ret;
+	api->godot_variant_new_int(&ret, 1);
+	return ret;
 }
 
 
@@ -203,6 +211,9 @@ godot_variant godot_set_moves(godot_object *p_instance, void *p_method_data,
 		count++;
 	}
 	user_data->boardcopy->num_moves = count;
+	godot_variant ret;
+	api->godot_variant_new_int(&ret, 1);
+	return ret;
 
 }
 
@@ -213,7 +224,9 @@ godot_variant godot_set_color(godot_object *p_instance, void *p_method_data,
 	user_data_struct *user_data = (user_data_struct *) p_user_data;
 
 	user_data->color = api->godot_variant_as_int(p_args[0]);
-
+	godot_variant ret;
+	api->godot_variant_new_int(&ret, 1);
+	return ret;
 }
 
 

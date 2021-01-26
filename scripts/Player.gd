@@ -22,7 +22,7 @@ func _input(event):
 		return
 	if event is InputEventMouseButton and not event.pressed:
 		var mousepos = event.position
-		mousepos = piecemap.world_to_map(mousepos -get_parent().get_parent().rect_position +get_parent().position)
+		mousepos = piecemap.world_to_map(mousepos -Vector2(8,8)-get_parent().get_parent().rect_position +get_parent().position)
 		if piece_selected:
 			move_piece(mousepos)
 		else:

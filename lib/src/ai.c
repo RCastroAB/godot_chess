@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#define max(a,b) a > b ? a : b
+#define min(a,b) a < b ? a : b
+
 
 void set_moves(Board *board, int **moves){
   for (int i=0; 1; i++){
@@ -90,7 +93,7 @@ Board *get_child(Board *board, int i, enum Player color){
 
 
 
-float minmax(Board *board, enum Player color, enum Player playing, int depth){
+float minmax(Board *board, enum Player color, enum Player playing, int depth, float alpha, float beta){
   proccess_moves(board, playing);
   if (depth ==0){
     return evaluate_board(board, color);
@@ -104,15 +107,19 @@ float minmax(Board *board, enum Player color, enum Player playing, int depth){
   }
   for (int i=0; i< board->num_moves; i++){
     Board *child = get_child(board, i, playing);
-    float value = minmax(child, color, next_player, depth-1);
+    float value = minmax(child, color, next_player, depth-1, alpha, beta);
     delete_boardcopy(child);
     if (playing == color){
-      if (value > best_value){
-        best_value = value;
+      best_value = max(value, best_value);
+      alpha = max(value, alpha);
+      if (beta <= alpha){
+        break;
       }
     } else {
-      if (value < best_value){
-        best_value = value;
+      best_value = min(value, best_value);
+      beta = min(value, beta);
+      if (beta <= alpha){
+        break;
       }
     }
 
@@ -132,7 +139,7 @@ int get_move(Board *board, enum Player color, int depth){
   printf("ai pieces: %d", get_player(board, color)->piece_count);
   for (int i=0; i < board->num_moves; i++){
     Board *child = get_child(board, i, color);
-    float value = minmax(child, color, next_player, depth);
+    float value = minmax(child, color, next_player, depth, -999999, 999999);
     delete_boardcopy(child);
     if (value > max_value){
       max_value = value;
