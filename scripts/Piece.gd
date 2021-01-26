@@ -19,9 +19,10 @@ var moved = false
 func _ready():
 	pass # Replace with function body.
 
+	
+
 
 func create_piece(piecename, color):
-	var movesrepeat
 	player = color
 	var path = ''
 	if color == 'white':
@@ -42,7 +43,7 @@ func create_piece(piecename, color):
 			$Sprite.texture = load(SPRITES + path + 'WIP_rook.png')
 		
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _physics_process(delta: float) -> void:
 	if target != position and not moving:
 		moving = true
 		direction = (target - position)

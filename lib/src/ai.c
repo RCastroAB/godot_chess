@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 
 void set_moves(Board *board, int **moves){
   for (int i=0; 1; i++){
@@ -54,13 +55,13 @@ float evaluate_board(Board *board, enum Player color){
     if (check_mate(board, opponent)){
       return 100.0;
     } else {
-      value += 10.0;
+      value += 3.0;
     }
   } else if (check_check(board, color)){
     if (check_mate(board, color)){
       return -100.0;
     } else {
-      value += -10.0;
+      value += -3.0;
     }
   }
   Player *player = get_player(board, color);
@@ -123,6 +124,8 @@ float minmax(Board *board, enum Player color, enum Player playing, int depth){
 
 
 int get_move(Board *board, enum Player color, int depth){
+  time_t t;
+  srand(time(&t));
   float max_value = -999999;
   int best_move = rand() % board->num_moves;
   enum Player next_player = color == WHITE ? BLACK : WHITE;
@@ -134,6 +137,11 @@ int get_move(Board *board, enum Player color, int depth){
     if (value > max_value){
       max_value = value;
       best_move = i;
+    } else if (value == max_value){
+      int choice = rand()%2;
+      if (choice){
+        best_move = i;
+      }
     }
   }
   move_piece(board, color, board->moves[best_move][0], board->moves[best_move][1], board->moves[best_move][2], board->moves[best_move][3]);

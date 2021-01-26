@@ -139,17 +139,19 @@ func clear_overlay(pos):
 	set_cellv(pos, -1)
 
 
+var piecenames = {
+	1: 'pawn',
+	2: 'rook',
+	3: 'knight',
+	4: 'bishop',
+	5: 'queen',
+	6: 'king'
+}
+
 func set_board(board):
 	for child in get_children():
 		remove_child(child)
-	var piecenames = {
-		1: 'pawn',
-		2: 'rook',
-		3: 'knight',
-		4: 'bishop',
-		5: 'queen',
-		6: 'king'
-	}
+
 	
 	self.board = board
 	for pos in board.keys():
@@ -160,12 +162,17 @@ func set_board(board):
 
 
 func _on_new_board(board):
+	print('board: ')
+	print(board)
 	for child in get_children():
 		var exists = false
 		for piece_pos in board.keys():
 			if child.id == board[piece_pos][0]:
 				exists = true
 				child.target = map_to_world(piece_pos) + cell_size/2
+				var piecename = piecenames[int(board[piece_pos][1])]
+				if piecename != child.type:
+					child.create_piece(piecename, child.player)
 		if not exists:
 			pieces.erase(child.id)
 			remove_child(child)

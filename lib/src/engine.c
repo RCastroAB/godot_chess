@@ -80,7 +80,7 @@ void new_board(Board *board){
       board->grid[i][j].id = 0;
     }
   }
-
+  board->passant = NULL;
 }
 
 
@@ -165,9 +165,7 @@ int check_setup(Board *board, Piece *piece, int x, int y, int attx, int atty){
   copy->moves[0][4] = attx;
   copy->moves[0][5] = atty;
 
-
   move_piece(copy, piece->color, piece->x, piece->y, x, y);
-
   int ret =  check_check(copy, color);
   delete_boardcopy(copy);
   return ret;
@@ -472,6 +470,7 @@ int force_move_piece(Board *board, enum Player player, int x, int y, int new_x, 
   board->grid[new_x][new_y] = board->grid[x][y];
   board->grid[new_x][new_y].x = new_x;
   board->grid[new_x][new_y].y = new_y;
+  board->grid[new_x][new_y].moved = 1;
   board->grid[x][y].piecetype = NONE;
   board->grid[x][y].color = EMPTY;
   Player *p = get_player(board, player);
@@ -481,12 +480,21 @@ int force_move_piece(Board *board, enum Player player, int x, int y, int new_x, 
       break;
     }
   }
-  if (board->grid[new_x][new_y].piecetype == KING){
+  Piece moved_piece = board->grid[new_x][new_y];
+  if (moved_piece.piecetype == KING){
     if (new_x - x == 2){
       force_move_piece(board, player, 7, y, 5, y, -1, -1);
     }
     if (new_x - x == -2){
       force_move_piece(board, player, 0, y, 3, y, -1, -1);
+    }
+  }
+  if (moved_piece.piecetype == PAWN){
+    if (moved_piece.color == BLACK && new_y == 7){
+      board->grid[new_x][new_y].piecetype = QUEEN;
+    }
+    if (moved_piece.color == WHITE && new_y == 0){
+      board->grid[new_x][new_y].piecetype = QUEEN;
     }
   }
 
